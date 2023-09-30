@@ -1768,7 +1768,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "wgpu_rendewrer"
+name = "wgpu_renderer"
 version = "0.1.0"
 dependencies = [
  "anyhow",

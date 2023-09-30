@@ -1,5 +1,5 @@
 [package]
-name = "wgpu_rendewrer"
+name = "wgpu_renderer"
 version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/FirePrincess01/wgpu_renderer"
