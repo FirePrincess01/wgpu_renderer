@@ -1,9 +1,9 @@
 [package]
-name = "wave_simulation"
+name = "wgpu_rendewrer"
 version = "0.1.0"
 edition = "2021"
-repository = "https://github.com/FirePrincess01/wave_simulation"
-description = "Simulation of a Wave Equation using the Verlet Method"
+repository = "https://github.com/FirePrincess01/wgpu_renderer"
+description = "A collection of shaders and utilities "
 license-file = "LICENSE"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
