@@ -6,3 +6,4 @@ pub mod renderer;
 pub mod performance_monitor;
 pub mod gui;
 pub mod label;
+pub mod freefont;
