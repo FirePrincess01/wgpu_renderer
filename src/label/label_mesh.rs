@@ -1,6 +1,6 @@
 //! Creates a texture with a text label
 
-use super::super::wgpu_renderer::WgpuRendererInterface;
+use super::super::renderer::WgpuRendererInterface;
 use super::super::vertex_texture_shader::{
     Vertex, 
     VertexBuffer, 

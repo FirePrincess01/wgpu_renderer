@@ -8,7 +8,7 @@ use super::vertex;
 use super::color;
 use super::instance;
 use super::camera_bind_group_layout;
-use super::super::wgpu_renderer::depth_texture;
+use super::super::renderer::depth_texture;
 
 
 /// A general purpose shader using vertices, colors and an instance matrix

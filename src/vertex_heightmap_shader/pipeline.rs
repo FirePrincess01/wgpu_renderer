@@ -6,7 +6,7 @@ use super::InstanceRaw;
 use super::TextureBindGroupLayout;
 use super::CameraBindGroupLayout;
 use super::HeightmapBindGroupLayout;
-use super::super::wgpu_renderer::depth_texture::DepthTexture;
+use super::super::renderer::depth_texture::DepthTexture;
 
 
 /// A general purpose shader using vertices, colors and an instance matrix

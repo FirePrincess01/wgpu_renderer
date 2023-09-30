@@ -3,7 +3,7 @@
 
 
 use super::texture_bind_group_layout::TextureBindGroupLayout;
-use super::super::wgpu_renderer;
+use super::super::renderer;
 use anyhow::*;
 
 pub struct Texture {
@@ -15,7 +15,7 @@ pub struct Texture {
 
 impl Texture {
     pub fn new(
-        wgpu_renderer: &mut impl wgpu_renderer::WgpuRendererInterface,
+        wgpu_renderer: &mut impl renderer::WgpuRendererInterface,
         texture_bind_group_layout: &TextureBindGroupLayout,
         rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>, 
         label: Option<&str>
