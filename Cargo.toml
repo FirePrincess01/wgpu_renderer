@@ -1,0 +1,52 @@
+[package]
+name = "wave_simulation"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/FirePrincess01/wave_simulation"
+description = "Simulation of a Wave Equation using the Verlet Method"
+license-file = "LICENSE"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+# [[bin]]
+# name = "app"
+# test = false
+# doc = false
+
+[dependencies]
+# dependencies for wgpu 
+cfg-if = "1"
+env_logger = "0.10"
+winit = "0.28"
+pollster = "0.3"
+wgpu = "0.17"
+bytemuck = { version = "1.12", features = [ "derive" ] }
+# dependencies for wgpu math
+cgmath = "0.18"
+glam = "0.24"
+instant = "0.1"
+# other
+colorous = "1.0"
+anyhow = "1.0"
+rusttype = "0.9"
+
+[dependencies.image]
+version = "0.24"
+default-features = false
+features = ["png", "jpeg"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1.6"
+log = "0.4"
+console_log = "1.0.0"
+wgpu = { version = "0.17", features = [ "webgl" ]}
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = [
+    "Document",
+    "Window",
+    "Element",
+]}
