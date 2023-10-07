@@ -32,6 +32,7 @@ instant = "0.1"
 colorous = "1.0"
 anyhow = "1.0"
 rusttype = "0.9"
+log = "0.4"
 
 [dependencies.image]
 version = "0.24"

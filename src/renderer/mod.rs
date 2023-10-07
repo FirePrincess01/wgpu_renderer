@@ -124,7 +124,19 @@ impl WgpuRenderer
             self.config.width = new_size.width;
             self.config.height = new_size.height;
             self.depth_texture = depth_texture::DepthTexture::create_depth_texture(&self.device, &self.config, "depth_texture");
-            self.surface.configure(&self.device, &self.config)
+            
+            {
+                let res1 = self.surface.get_current_texture();
+                let i = 0;
+            }
+            self.surface.configure(&self.device, &self.config);
+
+            {
+                let res2 = self.surface.get_current_texture();
+                // let res3 = self.surface.get_current_texture();
+                let i = 0;
+            }
+            
         }
     }
 
@@ -141,7 +153,6 @@ impl WgpuRenderer
     }
 
     pub fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError> {
-        
         self.surface.get_current_texture()
     }
 
