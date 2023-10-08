@@ -48,7 +48,6 @@ impl Graph {
 
         // vertices
         for i in 0..Self::FPS_LINES.len() {
-            let len = vertices.len();
             vertices[i] = Self::FPS_LINES[i];
         }   
 
