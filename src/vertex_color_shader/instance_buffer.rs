@@ -32,7 +32,7 @@ impl InstanceBuffer {
     {   
         let data = bytemuck::cast_slice(instances);
 
-        if self.buffer.size() <= data.len() as u64 {
+        if data.len() as u64 <= self.buffer.size() {
             queue.write_buffer(&self.buffer, 0, data);
         }
     }
