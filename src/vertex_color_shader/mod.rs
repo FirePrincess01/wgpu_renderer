@@ -17,6 +17,7 @@ pub mod pipeline;
 pub mod camera_bind_group_layout;
 pub mod camera_uniform;
 pub mod camera_uniform_buffer;
+pub mod vertex_color_shader_draw;
 
 pub use vertex::Vertex;
 pub use vertex_buffer::VertexBuffer;
@@ -31,4 +32,5 @@ pub use pipeline::Pipeline;
 pub use camera_bind_group_layout::CameraBindGroupLayout;
 pub use camera_uniform::CameraUniform;
 pub use camera_uniform_buffer::CameraUniformBuffer;
+pub use vertex_color_shader_draw::VertexColorShaderDraw;
 

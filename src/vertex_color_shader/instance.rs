@@ -23,6 +23,14 @@ pub struct InstanceRaw {
 }
 
 impl InstanceRaw {
+    pub fn new() -> Self {
+        let model = glam::Mat4::IDENTITY.to_cols_array_2d();
+
+        Self {
+            model,
+        }
+    }
+
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
         use std::mem;
         wgpu::VertexBufferLayout {

@@ -28,6 +28,8 @@ impl Graph {
     const LINE_LENGTH: usize = 200;
 
     const FPS_LINES: &[Vertex] = &[
+        Vertex { position: [Self::OFFSET_X as f32,                         Self::OFFSET_Y as f32 as f32, 0.0] }, 
+        Vertex { position: [Self::OFFSET_X as f32 + Self::NR_LINES as f32, Self::OFFSET_Y as f32 as f32, 0.0] },
         Vertex { position: [Self::OFFSET_X as f32,                         Self::OFFSET_Y as f32 + Self::LEN_PER_MICRO * Self::DURATION_120FPS.as_micros() as f32, 0.0] }, 
         Vertex { position: [Self::OFFSET_X as f32 + Self::NR_LINES as f32, Self::OFFSET_Y as f32 + Self::LEN_PER_MICRO * Self::DURATION_120FPS.as_micros() as f32, 0.0] },
         Vertex { position: [Self::OFFSET_X as f32,                         Self::OFFSET_Y as f32 + Self::LEN_PER_MICRO * Self::DURATION_60FPS.as_micros() as f32, 0.0] }, 
@@ -41,13 +43,12 @@ impl Graph {
         let line_nr_vertices = watchpoints_size * 2 + 2;
 
         let mut vertices = vec![Vertex::zero(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
-        let mut colors = vec![Color::white(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
+        let mut colors = vec![Color::_black(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
         let mut indices = vec![0_u32; line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
 
         // vertices
         for i in 0..Self::FPS_LINES.len() {
-            let len = vertices.len();
-            vertices[i + len - Self::FPS_LINES.len()] = Self::FPS_LINES[i];
+            vertices[i] = Self::FPS_LINES[i];
         }   
 
         // colors
@@ -63,15 +64,15 @@ impl Graph {
                 let g = color.g as f32 / 255.0;
                 let b = color.b as f32 / 255.0;
 
-                colors[i*line_nr_vertices + j*2].color = [r, g, b]; 
+                colors[ Self::FPS_LINES.len() + i*line_nr_vertices + j*2].color = [r, g, b]; 
 
-                colors[i*line_nr_vertices + j*2+1].color = [r, g, b]; 
+                colors[ Self::FPS_LINES.len() + i*line_nr_vertices + j*2+1].color = [r, g, b]; 
             }
 
             // last two points are gray (show the combined fps)
             let gray = [0.5, 0.5, 0.5];
-            colors[i*line_nr_vertices + line_nr_vertices-2].color = gray; 
-            colors[i*line_nr_vertices + line_nr_vertices-1].color = gray; 
+            colors[ Self::FPS_LINES.len() + i*line_nr_vertices + line_nr_vertices-2].color = gray; 
+            colors[ Self::FPS_LINES.len() + i*line_nr_vertices + line_nr_vertices-1].color = gray; 
         }
 
         // indices
@@ -97,21 +98,39 @@ impl Graph {
         for (i, watchpoint) in watchpoints.iter().enumerate() {
             let j = i * 2;
 
-            line[j] =   (watchpoint.start - last_update_time).as_micros() as f32 *  Self::LEN_PER_MICRO;
-            line[j+1] = (watchpoint.stop - last_update_time).as_micros() as f32 *  Self::LEN_PER_MICRO;
-        }
+            let micros_start = if watchpoint.start > last_update_time {
+                (watchpoint.start - last_update_time).as_micros() as f32 *  Self::LEN_PER_MICRO
+                }
+                else {
+                    0.0
+                };
+
+            let micros_stop = if watchpoint.start > last_update_time {
+                (watchpoint.stop - last_update_time).as_micros() as f32 *  Self::LEN_PER_MICRO
+                }
+                else {
+                    0.0
+                };
+
+            line[j] =   micros_start;
+            line[j+1] = micros_stop;
+        };
+
+        let micros = if update_time > last_update_time {
+            (update_time - last_update_time).as_micros() as f32 *  Self::LEN_PER_MICRO
+            }
+            else {
+                0.0
+            };
 
         line[len-2] = 0.0;
-        line[len-1] = (update_time - last_update_time).as_micros() as f32 * Self::LEN_PER_MICRO;
+        line[len-1] = micros;
 
         line
     }
 
     fn update_vertices(vertices: &mut [Vertex], line: &[f32]) 
     {
-        let len = vertices.len();
-        let vertices = &mut vertices[0..len - Self::FPS_LINES.len()];
-
         assert!(!vertices.is_empty());
         assert!(vertices.len() % line.len() == 0);
 
@@ -140,7 +159,7 @@ impl watch::Viewer for Graph {
         }
 
         let line = Self::create_line(last_update_time, update_time, watchpoints);
-        Self::update_vertices(&mut self.vertices, &line);
+        Self::update_vertices(&mut self.vertices[Self::FPS_LINES.len()..], &line);
     }
 }
 
