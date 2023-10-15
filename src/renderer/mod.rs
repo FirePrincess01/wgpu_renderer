@@ -94,7 +94,10 @@ impl WgpuRenderer
             present_mode: {
                 if surface_caps.present_modes.len() >= 2 {
                     // surface_caps.present_modes[0]  // vsync on
-                    surface_caps.present_modes[1]  // vsync off
+                    // surface_caps.present_modes[1]  // vsync off
+                    wgpu::PresentMode::Immediate
+                    // wgpu::PresentMode::Fifo
+
                 }
                 else {
                     surface_caps.present_modes[0]
