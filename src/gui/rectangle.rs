@@ -1,15 +1,15 @@
 //! A clickable button
 
-use super::ButtonPressedEvent;
+use super::RectanglePressedEvent;
 use super::ChangePositionEvent;
 
-pub struct Button<ButtonId> 
-    where ButtonId: Copy
+pub struct Rectangle<RectangleId> 
+    where RectangleId: Copy
 {
     width: u32,
     height: u32,
     boarder: u32,
-    button_id: ButtonId,
+    rectangle_id: RectangleId,
 
     // cache sizes
     abs_x: u32,
@@ -17,19 +17,20 @@ pub struct Button<ButtonId>
     pressed: bool,
 }
 
-impl<ButtonId> Button<ButtonId>
-    where ButtonId: Copy
+impl<RectangleId> Rectangle<RectangleId>
+    where RectangleId: Copy
 {
-    pub fn new(width: u32,
+    pub fn new(rectangle_id: RectangleId,
+        width: u32,
         height: u32,
         boarder: u32,
-        button_id: ButtonId) -> Self
+    ) -> Self
     {
         Self{ 
             width, 
             height, 
             boarder,
-            button_id,
+            rectangle_id,
 
             abs_x: 0,
             abs_y: 0,
@@ -37,8 +38,8 @@ impl<ButtonId> Button<ButtonId>
         }
     }
 
-    pub fn _id(&self) -> ButtonId {
-        self.button_id
+    pub fn _id(&self) -> RectangleId {
+        self.rectangle_id
     }
 
     pub fn width(&self) -> u32 {
@@ -59,7 +60,7 @@ impl<ButtonId> Button<ButtonId>
         y >= self.abs_y + self.boarder && y <= self.abs_y + self.height + self.boarder 
     }
 
-    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<ButtonPressedEvent<ButtonId>>) {
+    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
@@ -68,7 +69,7 @@ impl<ButtonId> Button<ButtonId>
         (true, None)
     }
 
-    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<ButtonPressedEvent<ButtonId>>) {
+    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
@@ -76,7 +77,7 @@ impl<ButtonId> Button<ButtonId>
         if self.pressed {
             self.pressed = false;
 
-            let event = ButtonPressedEvent{button_id: self.button_id};
+            let event = RectanglePressedEvent{rectangle_id: self.rectangle_id};
             (true, Some(event))
         }
         else {
@@ -84,10 +85,10 @@ impl<ButtonId> Button<ButtonId>
         }
     }
 
-    pub fn change_position_event<LabelId>(&self) -> ChangePositionEvent::<ButtonId, LabelId>
+    pub fn change_position_event(&self) -> ChangePositionEvent::<RectangleId>
     {
-        ChangePositionEvent::<ButtonId, LabelId>::new_button(
-            self.button_id, 
+        ChangePositionEvent::new(
+            self.rectangle_id, 
             self.abs_x + self.boarder, 
             self.abs_y + self.boarder)
     }

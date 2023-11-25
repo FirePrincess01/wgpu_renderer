@@ -2,7 +2,7 @@
 
 use super::GuiElement;
 use super::ChangePositionEvent;
-use super::ButtonPressedEvent;
+use super::RectanglePressedEvent;
 
 #[allow(dead_code)]
 pub enum Alignment {
@@ -12,15 +12,14 @@ pub enum Alignment {
     BottomRight,
 }
 
-pub struct AlignedElement<ButtonId, LabelId>
-where LabelId: Copy,
-    ButtonId: Copy,
+pub struct AlignedElement<RectangleId>
+where RectangleId: Copy,
 {
     alignment: Alignment,
     x: u32,
     y: u32,
     
-    element: GuiElement<ButtonId, LabelId>,
+    element: GuiElement<RectangleId>,
 
     // cache sizes
     abs_x: u32,
@@ -30,11 +29,10 @@ where LabelId: Copy,
 
 }
 
-impl<ButtonId, LabelId> AlignedElement<ButtonId, LabelId>
-where LabelId: Copy,
-    ButtonId: Copy,
+impl<RectangleId> AlignedElement<RectangleId>
+where RectangleId: Copy,
 {
-    pub fn new(alignment: Alignment, x: u32, y:u32, element: GuiElement<ButtonId, LabelId>) -> Self 
+    pub fn new(alignment: Alignment, x: u32, y:u32, element: GuiElement<RectangleId>) -> Self 
     {
         Self {
             alignment,
@@ -72,13 +70,9 @@ where LabelId: Copy,
 
     fn calculate_element_size(&mut self) {
         match &mut self.element {
-            GuiElement::Button(button) => {
-                self.width = button.width();
-                self.height = button.height();
-            }
-            GuiElement::Label(label) => {
-                self.width = label.width();
-                self.height = label.height();
+            GuiElement::Rectangle(rectangle) => {
+                self.width = rectangle.width();
+                self.height = rectangle.height();
             }
             GuiElement::VerticalLayout(vertical_layout) => {
                 self.width = vertical_layout.width();
@@ -87,19 +81,15 @@ where LabelId: Copy,
         }
     }
 
-    pub fn resize(&mut self, gui_width: u32, gui_height: u32, res: &mut Vec::<ChangePositionEvent<ButtonId, LabelId>>)
+    pub fn resize(&mut self, gui_width: u32, gui_height: u32, res: &mut Vec::<ChangePositionEvent<RectangleId>>)
     {
         self.calculate_element_size();
         self.calculate_absolute_position(gui_width, gui_height);
 
         match &mut self.element {
-            GuiElement::Button(button) => {
-                button.set_abs_pos(self.abs_x, self.abs_y);
-                res.push(button.change_position_event());
-            }
-            GuiElement::Label(label) => {
-                label.set_abs_pos(self.abs_x, self.abs_y);
-                res.push(label.change_position_event());
+            GuiElement::Rectangle(rectangle) => {
+                rectangle.set_abs_pos(self.abs_x, self.abs_y);
+                res.push(rectangle.change_position_event());
             }
             GuiElement::VerticalLayout(vertical_layout) => {
                 vertical_layout.resize(self.abs_x, self.abs_y, res);
@@ -112,26 +102,24 @@ where LabelId: Copy,
         y >= self.abs_y && y < self.abs_y + self.height 
     }
 
-    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<ButtonPressedEvent<ButtonId>>) {
+    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
 
         match &mut self.element {
-            GuiElement::Button(button) => button.mouse_pressed(abs_x, abs_y),
-            GuiElement::Label(label) => (label.mouse_pressed(abs_x, abs_y), None),
+            GuiElement::Rectangle(rectangle) => rectangle.mouse_pressed(abs_x, abs_y),
             GuiElement::VerticalLayout(vertical_layout) => vertical_layout.mouse_pressed(abs_x, abs_y),
         }        
     }
 
-    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<ButtonPressedEvent<ButtonId>>) {
+    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
 
         match &mut self.element {
-            GuiElement::Button(button) => button.mouse_released(abs_x, abs_y),
-            GuiElement::Label(label) => (label.mouse_released(abs_x, abs_y), None),
+            GuiElement::Rectangle(rectangle) => rectangle.mouse_released(abs_x, abs_y),
             GuiElement::VerticalLayout(vertical_layout) => vertical_layout.mouse_released(abs_x, abs_y),
         }  
     }
