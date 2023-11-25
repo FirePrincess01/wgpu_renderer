@@ -5,51 +5,28 @@ use super::*;
 #[derive(Debug)]
 #[derive(PartialEq)]
 #[derive(Copy, Clone)]
-enum ButtonId{
+enum RectangleId{
     PerformanceGraph,
     SwitchViewPoint,
     SwitchTexture,
-}
-
-#[derive(Copy, Clone)]
-enum LabelId{
     Fps,
     Menu,
 }
 
+
 struct TestGui {
-    pub gui: Gui<ButtonId, LabelId>,
+    pub gui: Gui<RectangleId>,
 }
 
 impl TestGui {
     fn new() -> Self {
 
-        let vertical_layout =  VerticalLayout::<ButtonId, LabelId>::new(vec![
-            GuiElement::Label(Label::new(
-                40, 
-                30, 
-                5,
-                LabelId::Menu)),
-            GuiElement::Label(Label::new(
-                40, 
-                30,  
-                5,
-                LabelId::Fps)),
-            GuiElement::Button(Button::new(
-                40, 
-                30,  
-                5,
-                ButtonId::SwitchTexture)),
-            GuiElement::Button(Button::new(
-                40, 
-                30, 
-                5,
-                ButtonId::SwitchViewPoint)),
-            GuiElement::Button(Button::new(
-                40, 
-                30, 
-                5,
-                ButtonId::PerformanceGraph)),
+        let vertical_layout =  VerticalLayout::new(vec![
+            GuiElement::Rectangle(Rectangle::new(RectangleId::Menu, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new(RectangleId::Fps, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new(RectangleId::SwitchTexture, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new(RectangleId::SwitchViewPoint, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new(RectangleId::PerformanceGraph, 40, 30, 5)),
         ]);
         
         let width = 800;
@@ -109,7 +86,7 @@ fn mouse_event() -> Result<(), String> {
     assert_eq!(event.is_some(), true);
     match event {
         Some(event) => {
-            assert_eq!(event.button_id, ButtonId::PerformanceGraph);
+            assert_eq!(event.rectangle_id, RectangleId::PerformanceGraph);
         },
         None => {},
     }
@@ -128,7 +105,7 @@ fn mouse_event() -> Result<(), String> {
     assert_eq!(event.is_some(), true);
     match event {
         Some(event) => {
-            assert_eq!(event.button_id, ButtonId::PerformanceGraph);
+            assert_eq!(event.rectangle_id, RectangleId::PerformanceGraph);
         },
         None => {},
     }
@@ -159,34 +136,26 @@ fn call_resize() -> Result<(), String> {
     assert_eq!(res.len(), 5);
 
     for event in &res {
-        match event.element_id {
-            gui::ElementId::Button(button_id) => {
-                match button_id {
-                    ButtonId::SwitchTexture => {
-                        assert_eq!(event.x, gui_width - 55);
-                        assert_eq!(event.y, 15 + 2*40);
-                    },
-                    ButtonId::SwitchViewPoint => {
-                        assert_eq!(event.x, gui_width - 55);
-                        assert_eq!(event.y, 15 + 1*40);
-                    },
-                    ButtonId::PerformanceGraph => {
-                        assert_eq!(event.x, gui_width - 55);
-                        assert_eq!(event.y, 15);
-                    },
-                }
+        match event.rectangle_id {
+            RectangleId::PerformanceGraph => {
+                assert_eq!(event.x, gui_width - 55);
+                assert_eq!(event.y, 15);
             },
-            gui::ElementId::Label(label_id) =>  {
-                match label_id {
-                    LabelId::Fps => {
-                        assert_eq!(event.x, gui_width - 55);
-                        assert_eq!(event.y, 15 + 3*40);
-                    },
-                    LabelId::Menu => {
-                        assert_eq!(event.x, gui_width - 55);
-                        assert_eq!(event.y, 15 + 4*40);
-                    },
-                }
+            RectangleId::SwitchViewPoint => {
+                assert_eq!(event.x, gui_width - 55);
+                assert_eq!(event.y, 15 + 1*40);
+            },
+            RectangleId::SwitchTexture => {
+                assert_eq!(event.x, gui_width - 55);
+                assert_eq!(event.y, 15 + 2*40);
+            },
+            RectangleId::Fps => {
+                assert_eq!(event.x, gui_width - 55);
+                assert_eq!(event.y, 15 + 3*40);
+            },
+            RectangleId::Menu => {
+                assert_eq!(event.x, gui_width - 55);
+                assert_eq!(event.y, 15 + 4*40);
             },
         }
     }

@@ -2,13 +2,12 @@
 
 use super::GuiElement;
 use super::ChangePositionEvent;
-use super::ButtonPressedEvent;
+use super::RectanglePressedEvent;
 
-pub struct VerticalLayout<ButtonId, LabelId> 
-where LabelId: Copy,
-    ButtonId: Copy,
+pub struct VerticalLayout<RectangleId> 
+where RectangleId: Copy,
 {
-    elements: Vec<GuiElement<ButtonId, LabelId>>,
+    elements: Vec<GuiElement<RectangleId>>,
 
     // cache sizes
     abs_x: u32,
@@ -17,11 +16,10 @@ where LabelId: Copy,
     height: u32,
 }
 
-impl<ButtonId, LabelId> VerticalLayout<ButtonId, LabelId> 
-where LabelId: Copy,
-    ButtonId: Copy,
+impl<RectangleId> VerticalLayout<RectangleId> 
+where RectangleId: Copy,
 {
-    pub fn new(elements: Vec<GuiElement<ButtonId, LabelId>>) -> Self 
+    pub fn new(elements: Vec<GuiElement<RectangleId>>) -> Self 
     {
         let mut vertical_layout = Self {
             elements,
@@ -45,13 +43,9 @@ where LabelId: Copy,
         for element in &self.elements 
         {
             match element {
-                GuiElement::Button(button) => {
-                    width = width.max(button.width()); 
-                    height = height + button.height();
-                }
-                GuiElement::Label(label) => {
-                    width = width.max(label.width()); 
-                    height = height + label.height();
+                GuiElement::Rectangle(rectangle) => {
+                    width = width.max(rectangle.width()); 
+                    height = height + rectangle.height();
                 }
                 GuiElement::VerticalLayout(vertical_layout) => {
                     width = width.max(vertical_layout.width()); 
@@ -66,7 +60,7 @@ where LabelId: Copy,
 
     }
 
-    pub fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<ButtonId, LabelId>>)
+    pub fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<RectangleId>>)
     {   
         self.abs_x = abs_x;
         self.abs_y = abs_y;
@@ -74,21 +68,13 @@ where LabelId: Copy,
 
         for element in &mut self.elements {
             match element {
-                GuiElement::Button(button) => {
-                    delta_height -= button.height();
+                GuiElement::Rectangle(rectangle) => {
+                    delta_height -= rectangle.height();
 
-                    let button_abs_x = abs_x;
-                    let button_abs_y = abs_y + delta_height;
-                    button.set_abs_pos(button_abs_x, button_abs_y);
-                    res.push(button.change_position_event());
-                }
-                GuiElement::Label(label) => {
-                    delta_height -= label.height();
-
-                    let label_abs_x = abs_x;
-                    let label_abs_y = abs_y + delta_height;
-                    label.set_abs_pos(label_abs_x, label_abs_y);
-                    res.push(label.change_position_event());
+                    let rectangle_abs_x = abs_x;
+                    let rectangle_abs_y = abs_y + delta_height;
+                    rectangle.set_abs_pos(rectangle_abs_x, rectangle_abs_y);
+                    res.push(rectangle.change_position_event());
                 }
                 GuiElement::VerticalLayout(vertical_layout) => {
                     delta_height -= vertical_layout.height();
@@ -114,25 +100,19 @@ where LabelId: Copy,
         y >= self.abs_y && y < self.abs_y + self.height 
     }
 
-    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<ButtonPressedEvent<ButtonId>>) {
+    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
 
         for element in &mut self.elements {
             match element {
-                GuiElement::Button(button) => {
-                    let (consumed, event) = button.mouse_pressed(abs_x, abs_y);
+                GuiElement::Rectangle(rectangle) => {
+                    let (consumed, event) = rectangle.mouse_pressed(abs_x, abs_y);
                     if consumed {
                         return (true, event);
                     }
                 },
-                GuiElement::Label(label) => {
-                    let consumed = label.mouse_pressed(abs_x, abs_y);
-                    if consumed {
-                        return (true, None);
-                    }
-                }
                 GuiElement::VerticalLayout(vertical_layout) => {
                     let (consumed, event) = vertical_layout.mouse_pressed(abs_x, abs_y);
                     if consumed {
@@ -146,25 +126,19 @@ where LabelId: Copy,
 
     }
 
-    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<ButtonPressedEvent<ButtonId>>) {
+    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
 
         for element in &mut self.elements {
             match element {
-                GuiElement::Button(button) => {
-                    let (consumed, event) = button.mouse_released(abs_x, abs_y);
+                GuiElement::Rectangle(rectangle) => {
+                    let (consumed, event) = rectangle.mouse_released(abs_x, abs_y);
                     if consumed {
                         return (true, event);
                     }
                 },
-                GuiElement::Label(label) => {
-                    let consumed = label.mouse_released(abs_x, abs_y);
-                    if consumed {
-                        return (true, None);
-                    }
-                }
                 GuiElement::VerticalLayout(vertical_layout) => {
                     let (consumed, event) = vertical_layout.mouse_released(abs_x, abs_y);
                     if consumed {
