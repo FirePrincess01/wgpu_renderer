@@ -69,16 +69,9 @@ where RectangleId: Copy,
     }
 
     fn calculate_element_size(&mut self) {
-        match &mut self.element {
-            GuiElement::Rectangle(rectangle) => {
-                self.width = rectangle.width();
-                self.height = rectangle.height();
-            }
-            GuiElement::VerticalLayout(vertical_layout) => {
-                self.width = vertical_layout.width();
-                self.height = vertical_layout.height();
-            }
-        }
+        let element = self.element.visit();
+        self.width = element.width();
+        self.height = element.height();
     }
 
     pub fn resize(&mut self, gui_width: u32, gui_height: u32, res: &mut Vec::<ChangePositionEvent<RectangleId>>)
@@ -86,15 +79,8 @@ where RectangleId: Copy,
         self.calculate_element_size();
         self.calculate_absolute_position(gui_width, gui_height);
 
-        match &mut self.element {
-            GuiElement::Rectangle(rectangle) => {
-                rectangle.set_abs_pos(self.abs_x, self.abs_y);
-                res.push(rectangle.change_position_event());
-            }
-            GuiElement::VerticalLayout(vertical_layout) => {
-                vertical_layout.resize(self.abs_x, self.abs_y, res);
-            }
-        }
+        let element = self.element.visit();
+        element.resize(self.abs_x, self.abs_y, res);
     }
 
     fn is_inside(&self, x: u32, y: u32) -> bool {
@@ -107,10 +93,8 @@ where RectangleId: Copy,
             return (false, None);
         }
 
-        match &mut self.element {
-            GuiElement::Rectangle(rectangle) => rectangle.mouse_pressed(abs_x, abs_y),
-            GuiElement::VerticalLayout(vertical_layout) => vertical_layout.mouse_pressed(abs_x, abs_y),
-        }        
+        let element = self.element.visit();
+        element.mouse_pressed(abs_x, abs_y)
     }
 
     pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
@@ -118,9 +102,7 @@ where RectangleId: Copy,
             return (false, None);
         }
 
-        match &mut self.element {
-            GuiElement::Rectangle(rectangle) => rectangle.mouse_released(abs_x, abs_y),
-            GuiElement::VerticalLayout(vertical_layout) => vertical_layout.mouse_released(abs_x, abs_y),
-        }  
+        let element = self.element.visit();
+        element.mouse_released(abs_x, abs_y)
     }
 }

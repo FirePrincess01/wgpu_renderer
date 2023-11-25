@@ -2,6 +2,7 @@
 
 use super::RectanglePressedEvent;
 use super::ChangePositionEvent;
+use super::gui_element::GuiElementInterface;
 
 pub struct Rectangle<RectangleId> 
     where RectangleId: Copy
@@ -42,25 +43,34 @@ impl<RectangleId> Rectangle<RectangleId>
         self.rectangle_id
     }
 
-    pub fn width(&self) -> u32 {
-        self.width + 2 * self.boarder 
-    }
-
-    pub fn height(&self) -> u32 {
-        self.height + 2 * self.boarder 
-    }
-
-    pub fn set_abs_pos(&mut self, abs_x: u32, abs_y: u32) {
-        self.abs_x = abs_x;
-        self.abs_y = abs_y;
-    }
-
     fn is_inside(&self, x: u32, y: u32) -> bool {
         x >= self.abs_x + self.boarder && x <= self.abs_x + self.width + self.boarder &&
         y >= self.abs_y + self.boarder && y <= self.abs_y + self.height + self.boarder 
     }
+}
 
-    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
+impl<RectangleId> GuiElementInterface<RectangleId> for Rectangle<RectangleId> 
+where RectangleId: Copy
+{
+    fn width(&self) -> u32 {
+        self.width + 2 * self.boarder 
+    }
+
+    fn height(&self) -> u32 {
+        self.height + 2 * self.boarder 
+    }
+
+    fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<RectangleId>>) {
+        self.abs_x = abs_x;
+        self.abs_y = abs_y;
+
+        res.push(ChangePositionEvent::new(
+            self.rectangle_id, 
+            self.abs_x + self.boarder, 
+            self.abs_y + self.boarder));
+    }
+
+    fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
@@ -69,7 +79,7 @@ impl<RectangleId> Rectangle<RectangleId>
         (true, None)
     }
 
-    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
+    fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
@@ -85,11 +95,5 @@ impl<RectangleId> Rectangle<RectangleId>
         }
     }
 
-    pub fn change_position_event(&self) -> ChangePositionEvent::<RectangleId>
-    {
-        ChangePositionEvent::new(
-            self.rectangle_id, 
-            self.abs_x + self.boarder, 
-            self.abs_y + self.boarder)
-    }
+
 }
