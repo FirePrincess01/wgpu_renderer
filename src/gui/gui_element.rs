@@ -4,15 +4,40 @@ use super::ChangePositionEvent;
 use super::Rectangle;
 use super::RectanglePressedEvent;
 use super::VerticalLayout;
+use super::HorizontalLayout;
 
 pub enum GuiElement<RectangleId>
 where RectangleId: Copy,
 {
     Rectangle(Rectangle<RectangleId>),
     VerticalLayout(VerticalLayout<RectangleId>),
-    // HorizontalLayout(GuiHorizontalLayout),
+    HorizontalLayout(HorizontalLayout<RectangleId>),
 }
 
+
+impl<RectangleId> From<Rectangle<RectangleId>> for GuiElement<RectangleId> 
+    where RectangleId: Copy,
+{
+    fn from(value: Rectangle<RectangleId>) -> Self {
+        Self::Rectangle(value)
+    }
+}
+
+impl<RectangleId> From<VerticalLayout<RectangleId>> for GuiElement<RectangleId> 
+    where RectangleId: Copy,
+{
+    fn from(value: VerticalLayout<RectangleId>) -> Self {
+        Self::VerticalLayout(value)
+    }
+}
+
+impl<RectangleId> From<HorizontalLayout<RectangleId>> for GuiElement<RectangleId> 
+    where RectangleId: Copy,
+{
+    fn from(value: HorizontalLayout<RectangleId>) -> Self {
+        Self::HorizontalLayout(value)
+    }
+}
 
 pub trait GuiElementInterface<RectangleId> {
     fn width(&self) -> u32;
@@ -23,12 +48,13 @@ pub trait GuiElementInterface<RectangleId> {
 }
 
 impl<RectangleId> GuiElement<RectangleId>
-where RectangleId: Copy,
+    where RectangleId: Copy,
 {
     pub fn visit(&mut self) -> &mut dyn GuiElementInterface<RectangleId> {
         match self {
             GuiElement::Rectangle(elem) => elem,
             GuiElement::VerticalLayout(elem) => elem,
+            GuiElement::HorizontalLayout(elem) => elem,
         }
     }
 }
