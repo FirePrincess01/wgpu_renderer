@@ -2,6 +2,7 @@
 
 use super::RectanglePressedEvent;
 use super::ChangePositionEvent;
+use super::gui_element::GuiElementInterface;
 
 pub struct Rectangle<RectangleId> 
     where RectangleId: Copy
@@ -10,6 +11,9 @@ pub struct Rectangle<RectangleId>
     height: u32,
     boarder: u32,
     rectangle_id: RectangleId,
+
+    pressed_event: bool,
+    released_event: bool,
 
     // cache sizes
     abs_x: u32,
@@ -20,10 +24,26 @@ pub struct Rectangle<RectangleId>
 impl<RectangleId> Rectangle<RectangleId>
     where RectangleId: Copy
 {
+    pub fn new_btn(rectangle_id: RectangleId,
+        width: u32,
+        height: u32,
+        boarder: u32,
+    ) -> Self
+    {
+        Self::new(rectangle_id, 
+            width, 
+            height, 
+            boarder, 
+            false, 
+            true)
+    }
+
     pub fn new(rectangle_id: RectangleId,
         width: u32,
         height: u32,
         boarder: u32,
+        pressed_event: bool,
+        released_event: bool,
     ) -> Self
     {
         Self{ 
@@ -31,7 +51,10 @@ impl<RectangleId> Rectangle<RectangleId>
             height, 
             boarder,
             rectangle_id,
-
+         
+            pressed_event,
+            released_event,
+        
             abs_x: 0,
             abs_y: 0,
             pressed: false,
@@ -42,34 +65,51 @@ impl<RectangleId> Rectangle<RectangleId>
         self.rectangle_id
     }
 
-    pub fn width(&self) -> u32 {
-        self.width + 2 * self.boarder 
-    }
-
-    pub fn height(&self) -> u32 {
-        self.height + 2 * self.boarder 
-    }
-
-    pub fn set_abs_pos(&mut self, abs_x: u32, abs_y: u32) {
-        self.abs_x = abs_x;
-        self.abs_y = abs_y;
-    }
-
     fn is_inside(&self, x: u32, y: u32) -> bool {
         x >= self.abs_x + self.boarder && x <= self.abs_x + self.width + self.boarder &&
         y >= self.abs_y + self.boarder && y <= self.abs_y + self.height + self.boarder 
     }
+}
 
-    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
+impl<RectangleId> GuiElementInterface<RectangleId> for Rectangle<RectangleId> 
+where RectangleId: Copy
+{
+    fn width(&self) -> u32 {
+        self.width + 2 * self.boarder 
+    }
+
+    fn height(&self) -> u32 {
+        self.height + 2 * self.boarder 
+    }
+
+    fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<RectangleId>>) {
+        self.abs_x = abs_x;
+        self.abs_y = abs_y;
+
+        res.push(ChangePositionEvent::new(
+            self.rectangle_id, 
+            self.abs_x + self.boarder, 
+            self.abs_y + self.boarder));
+    }
+
+    fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
 
-        self.pressed = true;
+        if !self.pressed {
+            self.pressed = true;
+
+            if self.pressed_event {
+                let event = RectanglePressedEvent{rectangle_id: self.rectangle_id, pressed: true};
+                return (true, Some(event));
+            }
+        }
+        
         (true, None)
     }
 
-    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
+    fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
         if !self.is_inside(abs_x, abs_y) {
             return (false, None);
         }
@@ -77,19 +117,14 @@ impl<RectangleId> Rectangle<RectangleId>
         if self.pressed {
             self.pressed = false;
 
-            let event = RectanglePressedEvent{rectangle_id: self.rectangle_id};
-            (true, Some(event))
+            if self.released_event {
+                let event = RectanglePressedEvent{rectangle_id: self.rectangle_id, pressed: false};
+                return (true, Some(event));
+            }
         }
-        else {
-            (true, None)
-        }
+        
+        (true, None)
     }
 
-    pub fn change_position_event(&self) -> ChangePositionEvent::<RectangleId>
-    {
-        ChangePositionEvent::new(
-            self.rectangle_id, 
-            self.abs_x + self.boarder, 
-            self.abs_y + self.boarder)
-    }
+
 }
