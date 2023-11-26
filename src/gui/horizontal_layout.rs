@@ -71,16 +71,16 @@ where RectangleId: Copy,
     fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<RectangleId>>) {
         self.abs_x = abs_x;
         self.abs_y = abs_y;
-        let mut delta_width = self.width;
+        let mut delta_width = 0;
 
         for element in &mut self.elements {
             let element = element.visit();
 
-            delta_width -= element.width();
-
             let element_abs_x = abs_x + delta_width;
-            let element_abs_y = abs_y;
+            let element_abs_y = abs_y + self.height/2 - element.height()/2;
             element.resize(element_abs_x, element_abs_y, res);
+
+            delta_width += element.width();
         }
     }
 

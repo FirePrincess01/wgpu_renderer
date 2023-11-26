@@ -10,6 +10,7 @@ pub enum Alignment {
     TopRight,
     BottomLeft,
     BottomRight,
+    Center,
 }
 
 pub struct AlignedElement<RectangleId>
@@ -65,6 +66,10 @@ where RectangleId: Copy,
                 self.abs_x = gui_width - self.x - self.width;
                 self.abs_y = self.y;
             }
+            Alignment::Center => {
+                self.abs_x = gui_width/2 - self.x - self.width/2;
+                self.abs_y = gui_height/2 - self.y - self.height/2;
+            },
         }
     }
 

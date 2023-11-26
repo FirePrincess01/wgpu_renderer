@@ -80,7 +80,7 @@ where RectangleId: Copy,
 
             delta_height -= element.height();
 
-            let element_abs_x = abs_x;
+            let element_abs_x = abs_x  + self.width/2 - element.width()/2;
             let element_abs_y = abs_y + delta_height;
             element.resize(element_abs_x, element_abs_y, res);
         }

@@ -24,13 +24,13 @@ pub struct Rectangle<RectangleId>
 impl<RectangleId> Rectangle<RectangleId>
     where RectangleId: Copy
 {
-    pub fn new(rectangle_id: RectangleId,
+    pub fn new_btn(rectangle_id: RectangleId,
         width: u32,
         height: u32,
         boarder: u32,
     ) -> Self
     {
-        Self::new_raw(rectangle_id, 
+        Self::new(rectangle_id, 
             width, 
             height, 
             boarder, 
@@ -38,7 +38,7 @@ impl<RectangleId> Rectangle<RectangleId>
             true)
     }
 
-    pub fn new_raw(rectangle_id: RectangleId,
+    pub fn new(rectangle_id: RectangleId,
         width: u32,
         height: u32,
         boarder: u32,

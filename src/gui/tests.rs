@@ -22,11 +22,11 @@ impl TestGui {
     fn new() -> Self {
 
         let vertical_layout =  VerticalLayout::new(vec![
-            GuiElement::Rectangle(Rectangle::new(RectangleId::Menu, 40, 30, 5)),
-            GuiElement::Rectangle(Rectangle::new(RectangleId::Fps, 40, 30, 5)),
-            GuiElement::Rectangle(Rectangle::new(RectangleId::SwitchTexture, 40, 30, 5)),
-            GuiElement::Rectangle(Rectangle::new(RectangleId::SwitchViewPoint, 40, 30, 5)),
-            GuiElement::Rectangle(Rectangle::new(RectangleId::PerformanceGraph, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::Menu, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::Fps, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::SwitchTexture, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::SwitchViewPoint, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::PerformanceGraph, 40, 30, 5)),
         ]);
         
         let width = 800;
