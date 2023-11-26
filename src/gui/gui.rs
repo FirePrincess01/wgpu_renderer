@@ -45,6 +45,7 @@ impl<RectangleId> ChangePositionEvent<RectangleId> {
 
 pub struct RectanglePressedEvent<RectangleId>{
     pub rectangle_id: RectangleId,
+    pub pressed: bool,
 }
 
 pub struct Gui<RectangleId> 

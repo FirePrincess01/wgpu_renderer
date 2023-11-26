@@ -12,6 +12,9 @@ pub struct Rectangle<RectangleId>
     boarder: u32,
     rectangle_id: RectangleId,
 
+    pressed_event: bool,
+    released_event: bool,
+
     // cache sizes
     abs_x: u32,
     abs_y: u32,
@@ -27,12 +30,31 @@ impl<RectangleId> Rectangle<RectangleId>
         boarder: u32,
     ) -> Self
     {
+        Self::new_raw(rectangle_id, 
+            width, 
+            height, 
+            boarder, 
+            false, 
+            true)
+    }
+
+    pub fn new_raw(rectangle_id: RectangleId,
+        width: u32,
+        height: u32,
+        boarder: u32,
+        pressed_event: bool,
+        released_event: bool,
+    ) -> Self
+    {
         Self{ 
             width, 
             height, 
             boarder,
             rectangle_id,
-
+         
+            pressed_event,
+            released_event,
+        
             abs_x: 0,
             abs_y: 0,
             pressed: false,
@@ -75,7 +97,15 @@ where RectangleId: Copy
             return (false, None);
         }
 
-        self.pressed = true;
+        if !self.pressed {
+            self.pressed = true;
+
+            if self.pressed_event {
+                let event = RectanglePressedEvent{rectangle_id: self.rectangle_id, pressed: true};
+                return (true, Some(event));
+            }
+        }
+        
         (true, None)
     }
 
@@ -87,12 +117,13 @@ where RectangleId: Copy
         if self.pressed {
             self.pressed = false;
 
-            let event = RectanglePressedEvent{rectangle_id: self.rectangle_id};
-            (true, Some(event))
+            if self.released_event {
+                let event = RectanglePressedEvent{rectangle_id: self.rectangle_id, pressed: false};
+                return (true, Some(event));
+            }
         }
-        else {
-            (true, None)
-        }
+        
+        (true, None)
     }
 
 
