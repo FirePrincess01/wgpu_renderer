@@ -1,26 +1,28 @@
 //! Arranges gui elements horizontally
 
 use super::GuiElement;
-use super::ChangePositionEvent;
-use super::RectanglePressedEvent;
+use super::gui_element::ChangePositionEvent;
 use super::gui_element::GuiElementInterface;
+use super::gui_element::MouseEventResult;
 
-pub struct HorizontalLayout<RectangleId> 
-where RectangleId: Copy,
+pub struct HorizontalLayout<ElementId, PressedId, ReleasedId> 
+where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
-    elements: Vec<GuiElement<RectangleId>>,
+    elements: Vec<GuiElement<ElementId, PressedId, ReleasedId>>,
 
     // cache sizes
     abs_x: u32,
     abs_y: u32,
     width: u32,
     height: u32,
+
+    active: bool,
 }
 
-impl<RectangleId> HorizontalLayout<RectangleId> 
-where RectangleId: Copy,
+impl<ElementId, PressedId, ReleasedId> HorizontalLayout<ElementId, PressedId, ReleasedId> 
+where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
-    pub fn new(elements: Vec<GuiElement<RectangleId>>) -> Self 
+    pub fn new(elements: Vec<GuiElement<ElementId, PressedId, ReleasedId>>) -> Self 
     {
         let mut vertical_layout = Self {
             elements,
@@ -29,6 +31,8 @@ where RectangleId: Copy,
             abs_y: 0,
             width: 0,
             height: 0,
+
+            active: false,
         };
 
         vertical_layout.calculate_element_size();
@@ -57,8 +61,8 @@ where RectangleId: Copy,
     }
 }
 
-impl<RectangleId> GuiElementInterface<RectangleId> for HorizontalLayout<RectangleId> 
-where RectangleId: Copy,
+impl<ElementId, PressedId, ReleasedId> GuiElementInterface<ElementId, PressedId, ReleasedId> for HorizontalLayout<ElementId, PressedId, ReleasedId> 
+where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
     fn width(&self) -> u32 {
         self.width
@@ -68,7 +72,7 @@ where RectangleId: Copy,
         self.height
     }
 
-    fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<RectangleId>>) {
+    fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<ElementId>>) {
         self.abs_x = abs_x;
         self.abs_y = abs_y;
         let mut delta_width = 0;
@@ -84,36 +88,17 @@ where RectangleId: Copy,
         }
     }
 
-    fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
-        if !self.is_inside(abs_x, abs_y) {
-            return (false, None);
+    fn mouse_event(&mut self, abs_x: u32, abs_y: u32, pressed: bool, res: &mut MouseEventResult<PressedId, ReleasedId>)
+    {
+        if !self.is_inside(abs_x, abs_y) && !self.active {
+            return;
         }
 
         for element in &mut self.elements {
             let element = element.visit();
-
-            let (consumed, event) = element.mouse_pressed(abs_x, abs_y);
-            if consumed {
-                return (true, event);
-            }        
+            element.mouse_event(abs_x, abs_y, pressed, res);   
         }
 
-        (false, None) 
-    }
-
-    fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
-        if !self.is_inside(abs_x, abs_y) {
-            return (false, None);
-        }
-
-        for element in &mut self.elements {
-            let element = element.visit();
-            let (consumed, event) = element.mouse_released(abs_x, abs_y);
-            if consumed {
-                return (true, event);
-            }        
-        }
-
-        (false, None) 
+        self.active = res.consumed;
     }
 }
