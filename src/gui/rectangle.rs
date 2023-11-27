@@ -1,19 +1,18 @@
 //! A clickable button
 
-use super::RectanglePressedEvent;
-use super::ChangePositionEvent;
+use super::gui_element::ChangePositionEvent;
 use super::gui_element::GuiElementInterface;
+use super::gui_element::MouseEventResult;
 
-pub struct Rectangle<RectangleId> 
-    where RectangleId: Copy
+pub struct Rectangle<ElementId, PressedId, ReleasedId> 
+    where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
     width: u32,
     height: u32,
     boarder: u32,
-    rectangle_id: RectangleId,
-
-    pressed_event: bool,
-    released_event: bool,
+    rectangle_id: ElementId,
+    pressed_id: Option<PressedId>,
+    released_id: Option<ReleasedId>,
 
     // cache sizes
     abs_x: u32,
@@ -21,47 +20,78 @@ pub struct Rectangle<RectangleId>
     pressed: bool,
 }
 
-impl<RectangleId> Rectangle<RectangleId>
-    where RectangleId: Copy
+impl<ElementId, PressedId, ReleasedId>  Rectangle<ElementId, PressedId, ReleasedId> 
+    where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
-    pub fn new_btn(rectangle_id: RectangleId,
+    pub fn new(rectangle_id: ElementId, 
         width: u32,
         height: u32,
         boarder: u32,
     ) -> Self
     {
-        Self::new(rectangle_id, 
+        Self::new_param(rectangle_id, 
+            None,
+            None,
             width, 
             height, 
-            boarder, 
-            false, 
-            true)
+            boarder)
     }
 
-    pub fn new(rectangle_id: RectangleId,
+    pub fn new_btn(rectangle_id: ElementId, 
+        released_id: ReleasedId,
         width: u32,
         height: u32,
         boarder: u32,
-        pressed_event: bool,
-        released_event: bool,
+    ) -> Self
+    {
+        Self::new_param(rectangle_id, 
+            None,
+            Some(released_id),
+            width, 
+            height, 
+            boarder)
+    }
+
+    pub fn new_generic(rectangle_id: ElementId,
+        pressed_id: PressedId,
+        released_id: ReleasedId,
+        width: u32,
+        height: u32,
+        boarder: u32
+    ) -> Self
+    {
+        Self::new_param(rectangle_id, 
+            Some(pressed_id),
+            Some(released_id),
+            width, 
+            height, 
+            boarder)
+    }
+
+    pub fn new_param(rectangle_id: ElementId,
+        pressed_id: Option<PressedId>,
+        released_id: Option<ReleasedId>,
+        width: u32,
+        height: u32,
+        boarder: u32,
     ) -> Self
     {
         Self{ 
+            rectangle_id,
+            pressed_id,
+            released_id,
+
             width, 
             height, 
             boarder,
-            rectangle_id,
-         
-            pressed_event,
-            released_event,
-        
+                 
             abs_x: 0,
             abs_y: 0,
             pressed: false,
         }
     }
 
-    pub fn _id(&self) -> RectangleId {
+    pub fn _id(&self) -> ElementId {
         self.rectangle_id
     }
 
@@ -71,8 +101,8 @@ impl<RectangleId> Rectangle<RectangleId>
     }
 }
 
-impl<RectangleId> GuiElementInterface<RectangleId> for Rectangle<RectangleId> 
-where RectangleId: Copy
+impl<ElementId, PressedId, ReleasedId>  GuiElementInterface<ElementId, PressedId, ReleasedId> for Rectangle<ElementId, PressedId, ReleasedId> 
+where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
     fn width(&self) -> u32 {
         self.width + 2 * self.boarder 
@@ -82,48 +112,31 @@ where RectangleId: Copy
         self.height + 2 * self.boarder 
     }
 
-    fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<RectangleId>>) {
+    fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<ElementId>>) {
         self.abs_x = abs_x;
         self.abs_y = abs_y;
 
-        res.push(ChangePositionEvent::new(
-            self.rectangle_id, 
-            self.abs_x + self.boarder, 
-            self.abs_y + self.boarder));
+        res.push(ChangePositionEvent{ 
+            element_id: self.rectangle_id, 
+            x: self.abs_x + self.boarder, 
+            y: self.abs_y + self.boarder });
     }
 
-    fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
-        if !self.is_inside(abs_x, abs_y) {
-            return (false, None);
-        }
+    fn mouse_event(&mut self, abs_x: u32, abs_y: u32, pressed: bool, res: &mut MouseEventResult<PressedId, ReleasedId>)
+    {   
+        let is_inside = self.is_inside(abs_x, abs_y);
 
-        if !self.pressed {
+        if !self.pressed && (is_inside && pressed) {
             self.pressed = true;
-
-            if self.pressed_event {
-                let event = RectanglePressedEvent{rectangle_id: self.rectangle_id, pressed: true};
-                return (true, Some(event));
-            }
-        }
-        
-        (true, None)
-    }
-
-    fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
-        if !self.is_inside(abs_x, abs_y) {
-            return (false, None);
+            res.pressed_event = self.pressed_id;
         }
 
-        if self.pressed {
+        if self.pressed && (!is_inside || !pressed) {
             self.pressed = false;
-
-            if self.released_event {
-                let event = RectanglePressedEvent{rectangle_id: self.rectangle_id, pressed: false};
-                return (true, Some(event));
-            }
+            res.released_event = self.released_id;
         }
-        
-        (true, None)
+
+        res.consumed = res.consumed || is_inside;
     }
 
 

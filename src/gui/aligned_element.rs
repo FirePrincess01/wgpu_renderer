@@ -1,8 +1,7 @@
 //! Fixes a gui element to an edge of the window
 
 use super::GuiElement;
-use super::ChangePositionEvent;
-use super::RectanglePressedEvent;
+use super::gui_element::{MouseEventResult, ChangePositionEvent};
 
 #[allow(dead_code)]
 pub enum Alignment {
@@ -13,14 +12,14 @@ pub enum Alignment {
     Center,
 }
 
-pub struct AlignedElement<RectangleId>
-where RectangleId: Copy,
+pub struct AlignedElement<ElementId, PressedId, ReleasedId>
+where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
     alignment: Alignment,
     x: u32,
     y: u32,
     
-    element: GuiElement<RectangleId>,
+    element: GuiElement<ElementId, PressedId, ReleasedId>,
 
     // cache sizes
     abs_x: u32,
@@ -28,12 +27,13 @@ where RectangleId: Copy,
     width: u32,
     height: u32,
 
+    active: bool,
 }
 
-impl<RectangleId> AlignedElement<RectangleId>
-where RectangleId: Copy,
+impl<ElementId, PressedId, ReleasedId> AlignedElement<ElementId, PressedId, ReleasedId>
+where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
-    pub fn new(alignment: Alignment, x: u32, y:u32, element: GuiElement<RectangleId>) -> Self 
+    pub fn new(alignment: Alignment, x: u32, y:u32, element: GuiElement<ElementId, PressedId, ReleasedId>) -> Self 
     {
         Self {
             alignment,
@@ -45,6 +45,8 @@ where RectangleId: Copy,
             abs_y: 0,
             width: 0,
             height: 0,
+
+            active: false,
         }
     }
 
@@ -79,7 +81,7 @@ where RectangleId: Copy,
         self.height = element.height();
     }
 
-    pub fn resize(&mut self, gui_width: u32, gui_height: u32, res: &mut Vec::<ChangePositionEvent<RectangleId>>)
+    pub fn resize(&mut self, gui_width: u32, gui_height: u32, res: &mut Vec::<ChangePositionEvent<ElementId>>)
     {
         self.calculate_element_size();
         self.calculate_absolute_position(gui_width, gui_height);
@@ -93,21 +95,15 @@ where RectangleId: Copy,
         y >= self.abs_y && y < self.abs_y + self.height 
     }
 
-    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
-        if !self.is_inside(abs_x, abs_y) {
-            return (false, None);
+    pub fn mouse_event(&mut self, abs_x: u32, abs_y: u32, pressed: bool, res: &mut MouseEventResult<PressedId, ReleasedId>)
+    {
+        if !self.is_inside(abs_x, abs_y) && !self.active {
+            return;
         }
 
         let element = self.element.visit();
-        element.mouse_pressed(abs_x, abs_y)
-    }
+        element.mouse_event(abs_x, abs_y, pressed, res);   
 
-    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<RectanglePressedEvent<RectangleId>>) {
-        if !self.is_inside(abs_x, abs_y) {
-            return (false, None);
-        }
-
-        let element = self.element.visit();
-        element.mouse_released(abs_x, abs_y)
+        self.active = res.consumed;
     }
 }

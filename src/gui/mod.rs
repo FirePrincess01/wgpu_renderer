@@ -12,11 +12,15 @@ mod tests;
 
 pub use gui_element::GuiElement;
 pub use gui::Gui;
-pub use gui::ChangePositionEvent;
-pub use gui::RectanglePressedEvent;
 pub use gui::MouseEvent;
+pub use gui_element::MouseEventResult;
 pub use aligned_element::AlignedElement;
 pub use aligned_element::Alignment;
 pub use vertical_layout::VerticalLayout;
 pub use horizontal_layout::HorizontalLayout;
 pub use rectangle::Rectangle;
+
+#[derive(Copy, Clone)]
+pub enum NoId{
+
+}
