@@ -5,7 +5,7 @@
 use super::texture_bind_group_layout::TextureBindGroupLayout;
 use super::super::renderer;
 use anyhow::*;
-use image::{DynamicImage, GenericImageView, Rgba, Pixel};
+use image::Rgba;
 
 pub struct Texture {
     pub texture: wgpu::Texture,
@@ -202,9 +202,9 @@ impl Texture {
         for x in 0..small_image.width() {
             for y in 0..small_image.height() {
                 let p1: Rgba<u8> = *rgba.get_pixel(2 * x, 2 * y);
-                let p2: Rgba<u8> = *rgba.get_pixel(2 * x + 1, 2 * y);
-                let p3: Rgba<u8> = *rgba.get_pixel(2 * x, 2 * y + 1);
-                let p4: Rgba<u8> = *rgba.get_pixel(2 * x + 1, 2 * y + 1);
+                //let p2: Rgba<u8> = *rgba.get_pixel(2 * x + 1, 2 * y);
+                //let p3: Rgba<u8> = *rgba.get_pixel(2 * x, 2 * y + 1);
+                //let p4: Rgba<u8> = *rgba.get_pixel(2 * x + 1, 2 * y + 1);
                 // let averaged_pixel: Rgba<u8> = Rgba([
                 //     ((p1[0] as f32 * p1[0] as f32 + p2[0] as f32 * p2[0] as f32 + p3[0] as f32 * p3[0] as f32 + p4[0] as f32 * p4[0] as f32).sqrt() / 2.) as u8,
                 //     ((p1[1] as f32 * p1[1] as f32 + p2[1] as f32 * p2[1] as f32 + p3[1] as f32 * p3[1] as f32 + p4[1] as f32 * p4[1] as f32).sqrt() / 2.) as u8,
