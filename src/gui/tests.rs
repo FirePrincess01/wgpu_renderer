@@ -15,18 +15,18 @@ enum RectangleId{
 
 
 struct TestGui {
-    pub gui: Gui<RectangleId>,
+    pub gui: Gui<RectangleId, NoId, RectangleId>,
 }
 
 impl TestGui {
     fn new() -> Self {
 
         let vertical_layout =  VerticalLayout::new(vec![
-            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::Menu, 40, 30, 5)),
-            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::Fps, 40, 30, 5)),
-            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::SwitchTexture, 40, 30, 5)),
-            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::SwitchViewPoint, 40, 30, 5)),
-            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::PerformanceGraph, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::Menu, RectangleId::Menu, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::Fps, RectangleId::Fps, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::SwitchTexture, RectangleId::SwitchTexture, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::SwitchViewPoint, RectangleId::SwitchViewPoint, 40, 30, 5)),
+            GuiElement::Rectangle(Rectangle::new_btn(RectangleId::PerformanceGraph, RectangleId::PerformanceGraph, 40, 30, 5)),
         ]);
         
         let width = 800;
@@ -47,81 +47,81 @@ fn mouse_event() -> Result<(), String> {
     let mut gui = TestGui::new();
 
     // left bottom egdge of the 4 th button
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 10, y: 10 });
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 10, y: 10 });
+    assert_eq!(res.consumed, false);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Pressed);
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res= gui.gui.mouse_event(gui::MouseEvent::Pressed);
+    assert_eq!(res.consumed, false);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Released);
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res= gui.gui.mouse_event(gui::MouseEvent::Released);
+    assert_eq!(res.consumed, false);
+    assert_eq!(res.released_event.is_none(), true);
 
     // left bottom boarder of the 4 th button
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 14, y: 14 });
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 14, y: 14 });
+    assert_eq!(res.consumed, false);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Pressed);
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res= gui.gui.mouse_event(gui::MouseEvent::Pressed);
+    assert_eq!(res.consumed, false);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Released);
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res = gui.gui.mouse_event(gui::MouseEvent::Released);
+    assert_eq!(res.consumed, false);
+    assert_eq!(res.released_event.is_none(), true);
 
     // left bottom of the 4 th button
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 15, y: 15 });
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 15, y: 15 });
+    assert_eq!(res.consumed, true);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Pressed);
-    assert_eq!(consumed, true);
-    assert_eq!(event.is_none(), true);
+    let res= gui.gui.mouse_event(gui::MouseEvent::Pressed);
+    assert_eq!(res.consumed, true);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Released);
-    assert_eq!(consumed, true);
-    assert_eq!(event.is_some(), true);
-    match event {
+    let res = gui.gui.mouse_event(gui::MouseEvent::Released);
+    assert_eq!(res.consumed, true);
+    assert_eq!(res.released_event.is_some(), true);
+    match res.released_event {
         Some(event) => {
-            assert_eq!(event.rectangle_id, RectangleId::PerformanceGraph);
+            assert_eq!(event, RectangleId::PerformanceGraph);
         },
         None => {},
     }
 
     // right top of the 4 th button
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 55, y: 45 });
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 55, y: 45 });
+    assert_eq!(res.consumed, true);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Pressed);
-    assert_eq!(consumed, true);
-    assert_eq!(event.is_none(), true);
+    let res = gui.gui.mouse_event(gui::MouseEvent::Pressed);
+    assert_eq!(res.consumed, true);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Released);
-    assert_eq!(consumed, true);
-    assert_eq!(event.is_some(), true);
-    match event {
+    let res = gui.gui.mouse_event(gui::MouseEvent::Released);
+    assert_eq!(res.consumed, true);
+    assert_eq!(res.released_event.is_some(), true);
+    match res.released_event {
         Some(event) => {
-            assert_eq!(event.rectangle_id, RectangleId::PerformanceGraph);
+            assert_eq!(event, RectangleId::PerformanceGraph);
         },
         None => {},
     }
 
     // right top boarder of the 4 th button
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 60, y: 50 });
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res = gui.gui.mouse_event(gui::MouseEvent::Moved { x: 800 - 60, y: 50 });
+    assert_eq!(res.consumed, false);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Pressed);
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res = gui.gui.mouse_event(gui::MouseEvent::Pressed);
+    assert_eq!(res.consumed, false);
+    assert_eq!(res.released_event.is_none(), true);
 
-    let (consumed, event) = gui.gui.mouse_event(gui::MouseEvent::Released);
-    assert_eq!(consumed, false);
-    assert_eq!(event.is_none(), true);
+    let res = gui.gui.mouse_event(gui::MouseEvent::Released);
+    assert_eq!(res.consumed, false);
+    assert_eq!(res.released_event.is_none(), true);
 
     Ok(())
 }
@@ -136,7 +136,7 @@ fn call_resize() -> Result<(), String> {
     assert_eq!(res.len(), 5);
 
     for event in &res {
-        match event.rectangle_id {
+        match event.element_id {
             RectangleId::PerformanceGraph => {
                 assert_eq!(event.x, gui_width - 55);
                 assert_eq!(event.y, 15);
