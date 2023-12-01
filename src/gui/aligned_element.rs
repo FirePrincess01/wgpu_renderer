@@ -1,8 +1,7 @@
 //! Fixes a gui element to an edge of the window
 
 use super::GuiElement;
-use super::ChangePositionEvent;
-use super::ButtonPressedEvent;
+use super::gui_element::{MouseEventResult, ChangePositionEvent};
 
 #[allow(dead_code)]
 pub enum Alignment {
@@ -10,17 +9,17 @@ pub enum Alignment {
     TopRight,
     BottomLeft,
     BottomRight,
+    Center,
 }
 
-pub struct AlignedElement<ButtonId, LabelId>
-where LabelId: Copy,
-    ButtonId: Copy,
+pub struct AlignedElement<ElementId, PressedId, ReleasedId>
+where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
     alignment: Alignment,
     x: u32,
     y: u32,
     
-    element: GuiElement<ButtonId, LabelId>,
+    element: GuiElement<ElementId, PressedId, ReleasedId>,
 
     // cache sizes
     abs_x: u32,
@@ -28,13 +27,13 @@ where LabelId: Copy,
     width: u32,
     height: u32,
 
+    active: bool,
 }
 
-impl<ButtonId, LabelId> AlignedElement<ButtonId, LabelId>
-where LabelId: Copy,
-    ButtonId: Copy,
+impl<ElementId, PressedId, ReleasedId> AlignedElement<ElementId, PressedId, ReleasedId>
+where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
 {
-    pub fn new(alignment: Alignment, x: u32, y:u32, element: GuiElement<ButtonId, LabelId>) -> Self 
+    pub fn new(alignment: Alignment, x: u32, y:u32, element: GuiElement<ElementId, PressedId, ReleasedId>) -> Self 
     {
         Self {
             alignment,
@@ -46,6 +45,8 @@ where LabelId: Copy,
             abs_y: 0,
             width: 0,
             height: 0,
+
+            active: false,
         }
     }
 
@@ -67,44 +68,26 @@ where LabelId: Copy,
                 self.abs_x = gui_width - self.x - self.width;
                 self.abs_y = self.y;
             }
+            Alignment::Center => {
+                self.abs_x = gui_width/2 - self.x - self.width/2;
+                self.abs_y = gui_height/2 - self.y - self.height/2;
+            },
         }
     }
 
     fn calculate_element_size(&mut self) {
-        match &mut self.element {
-            GuiElement::Button(button) => {
-                self.width = button.width();
-                self.height = button.height();
-            }
-            GuiElement::Label(label) => {
-                self.width = label.width();
-                self.height = label.height();
-            }
-            GuiElement::VerticalLayout(vertical_layout) => {
-                self.width = vertical_layout.width();
-                self.height = vertical_layout.height();
-            }
-        }
+        let element = self.element.visit();
+        self.width = element.width();
+        self.height = element.height();
     }
 
-    pub fn resize(&mut self, gui_width: u32, gui_height: u32, res: &mut Vec::<ChangePositionEvent<ButtonId, LabelId>>)
+    pub fn resize(&mut self, gui_width: u32, gui_height: u32, res: &mut Vec::<ChangePositionEvent<ElementId>>)
     {
         self.calculate_element_size();
         self.calculate_absolute_position(gui_width, gui_height);
 
-        match &mut self.element {
-            GuiElement::Button(button) => {
-                button.set_abs_pos(self.abs_x, self.abs_y);
-                res.push(button.change_position_event());
-            }
-            GuiElement::Label(label) => {
-                label.set_abs_pos(self.abs_x, self.abs_y);
-                res.push(label.change_position_event());
-            }
-            GuiElement::VerticalLayout(vertical_layout) => {
-                vertical_layout.resize(self.abs_x, self.abs_y, res);
-            }
-        }
+        let element = self.element.visit();
+        element.resize(self.abs_x, self.abs_y, res);
     }
 
     fn is_inside(&self, x: u32, y: u32) -> bool {
@@ -112,27 +95,15 @@ where LabelId: Copy,
         y >= self.abs_y && y < self.abs_y + self.height 
     }
 
-    pub fn mouse_pressed(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<ButtonPressedEvent<ButtonId>>) {
-        if !self.is_inside(abs_x, abs_y) {
-            return (false, None);
+    pub fn mouse_event(&mut self, abs_x: u32, abs_y: u32, pressed: bool, res: &mut MouseEventResult<PressedId, ReleasedId>)
+    {
+        if !self.is_inside(abs_x, abs_y) && !self.active {
+            return;
         }
 
-        match &mut self.element {
-            GuiElement::Button(button) => button.mouse_pressed(abs_x, abs_y),
-            GuiElement::Label(label) => (label.mouse_pressed(abs_x, abs_y), None),
-            GuiElement::VerticalLayout(vertical_layout) => vertical_layout.mouse_pressed(abs_x, abs_y),
-        }        
-    }
+        let element = self.element.visit();
+        element.mouse_event(abs_x, abs_y, pressed, res);   
 
-    pub fn mouse_released(&mut self, abs_x: u32, abs_y: u32) -> (bool, Option<ButtonPressedEvent<ButtonId>>) {
-        if !self.is_inside(abs_x, abs_y) {
-            return (false, None);
-        }
-
-        match &mut self.element {
-            GuiElement::Button(button) => button.mouse_released(abs_x, abs_y),
-            GuiElement::Label(label) => (label.mouse_released(abs_x, abs_y), None),
-            GuiElement::VerticalLayout(vertical_layout) => vertical_layout.mouse_released(abs_x, abs_y),
-        }  
+        self.active = res.consumed;
     }
 }
