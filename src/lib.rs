@@ -5,6 +5,7 @@ pub mod vertex_heightmap_shader;
 pub mod renderer;
 pub mod performance_monitor;
 pub mod gui;
+pub mod gui3;
 pub mod label;
 pub mod freefont;
 pub mod default_window;
