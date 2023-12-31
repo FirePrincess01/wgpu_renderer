@@ -6,6 +6,7 @@ pub mod renderer;
 pub mod performance_monitor;
 pub mod gui;
 pub mod gui3;
+pub mod gui3_wgpu;
 pub mod label;
 pub mod freefont;
 pub mod default_window;

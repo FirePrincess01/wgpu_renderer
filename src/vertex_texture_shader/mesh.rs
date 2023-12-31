@@ -47,7 +47,7 @@ impl Mesh
         self.vertex_buffer.update(queue, vertices);
     }
 
-    pub fn _set_texture_index(&mut self, texture_index: usize)
+    pub fn set_texture_index(&mut self, texture_index: usize)
     {
         self.texture_index = texture_index;
     }
