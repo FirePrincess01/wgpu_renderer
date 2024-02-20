@@ -1,6 +1,5 @@
 //! An implementation for a window with an event loop
 
-
 pub trait DefaultWindowApp
 {
     fn get_size(&self) -> winit::dpi::PhysicalSize<u32>;
@@ -25,37 +24,32 @@ impl DefaultWindow {
             
             if #[cfg(target_arch = "wasm32")] {
                 std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-                console_log::init_with_level(log::Level::Warn).expect("Couldn't initialize logger");
+                console_log::init_with_level(log::Level::Info).expect("Couldn't initialize logger");
             } else {
-                env_logger::init();
+                // env_logger::init();
+                let mut builder = env_logger::Builder::new();
+                builder.target(env_logger::Target::Stdout);
+                builder.filter_level(log::LevelFilter::Info);
+                builder.write_style(env_logger::WriteStyle::Always);
+
+                builder.init();
             }
         }
 
         // create our event loop and window
-        let event_loop: winit::event_loop::EventLoop<()> = winit::event_loop::EventLoop::new();
-        let window: winit::window::Window = winit::window::WindowBuilder::new().build(&event_loop).unwrap();
-
-        use winit::dpi::PhysicalSize;
-        let size = PhysicalSize::new(700, 800);
-        window.set_inner_size(size);
-
-        // wait for the window to resize
-        while window.inner_size() != size {}
+        let event_loop: winit::event_loop::EventLoop<()> = winit::event_loop::EventLoop::new().unwrap();
+        let window_builder = winit::window::WindowBuilder::new();
+        let window: winit::window::Window = window_builder.build(&event_loop).unwrap();
 
         // we need to add a canvas to the HTML document that we will host our application
         #[cfg(target_arch = "wasm32")]
-        {
-            // Winit prevents sizing with CSS, so we have to set
-            // the size manually when on web.
-            // use winit::dpi::PhysicalSize;
-            // window.set_inner_size(PhysicalSize::new(600, 800));
-            
+        {           
             use winit::platform::web::WindowExtWebSys;
             web_sys::window()
                 .and_then(|win| win.document())
                 .and_then(|doc| {
                     let dst = doc.get_element_by_id("wasm-demo")?;
-                    let canvas = web_sys::Element::from(window.canvas());
+                    let canvas = web_sys::Element::from(window.canvas().unwrap());
                     dst.append_child(&canvas).ok()?;
                     Some(())
                 })
@@ -69,30 +63,15 @@ impl DefaultWindow {
     }    
 }
 
-pub fn run<T:DefaultWindowApp + 'static>(default_window: DefaultWindow, app: T)
+pub fn run<'a>(event_loop: winit::event_loop::EventLoop<()>, window: &'a winit::window::Window, app: impl DefaultWindowApp)
     {
         let mut state = app;
-        let window = default_window.window;
-        let event_loop = default_window.event_loop;
     
         let mut last_render_time = instant::Instant::now();
-
-        event_loop.run(move |event, _, control_flow| {
-            *control_flow = winit::event_loop::ControlFlow::Poll;
-    
-            // on the web, the resize event does not fire, so we check the value manually
-            #[cfg(target_arch = "wasm32")] 
-            {
-                if window.inner_size() != state.get_size()
-                {
-                    let scale = window.scale_factor() as f32;
-                    let size = window.inner_size();
         
-                    state.update_scale_factor(scale);
-                    state.resize(size);
-                }
-            }
-    
+        event_loop.set_control_flow(winit::event_loop::ControlFlow::Wait);
+
+        let res: Result<(), winit::error::EventLoopError> = event_loop.run(move |event, control_flow| {   
             match event {
                 // winit::event::Event::DeviceEvent {
                 //     event: winit::event::DeviceEvent::MouseMotion{ delta, },
@@ -109,44 +88,46 @@ pub fn run<T:DefaultWindowApp + 'static>(default_window: DefaultWindow, app: T)
                         #[cfg(not(target_arch="wasm32"))]
                         winit::event::WindowEvent::CloseRequested
                         | winit::event::WindowEvent::KeyboardInput {
-                            input:
-                                winit::event::KeyboardInput {
+                            event:
+                            winit::event::KeyEvent {
                                     state: winit::event::ElementState::Pressed,
-                                    virtual_keycode: Some(winit::event::VirtualKeyCode::Escape),
+                                    physical_key: winit::keyboard::PhysicalKey::Code(winit::keyboard::KeyCode::Escape),
                                     ..
                                 },
                             ..
-                        } => *control_flow = winit::event_loop::ControlFlow::Exit,
+                        } => control_flow.exit(),
                         winit::event::WindowEvent::Resized(physical_size) => {
+                            log::info!("resize: {} {}", physical_size.width, physical_size.height);
                             state.resize(*physical_size);
                         }
-                        winit::event::WindowEvent::ScaleFactorChanged { scale_factor, new_inner_size} => {
+                        winit::event::WindowEvent::ScaleFactorChanged { 
+                            scale_factor, 
+                            ..
+                        } => {
                             state.update_scale_factor(*scale_factor as f32);
-                            state.resize(**new_inner_size);
-                        }
+                        },
+                        winit::event::WindowEvent::RedrawRequested =>  {
+                            let now = instant::Instant::now();
+                            let dt = now - last_render_time;
+                            last_render_time = now;
+                            
+                            state.update(dt);
+                            match state.render() {
+                                Ok(_) => { window.request_redraw(); }
+                                // Reconfigure the surface if lost
+                                Err(wgpu::SurfaceError::Lost) => state.resize(state.get_size()),
+                                Err(wgpu::SurfaceError::OutOfMemory) => control_flow.exit(),
+                                Err(e) => eprintln!("{:?}", e),
+                            }
+
+                            
+                        },
                         _ => {}
                 } 
                 },
-                winit::event::Event::RedrawRequested(window_id) if window_id == window.id() => {
-                    let now = instant::Instant::now();
-                    let dt = now - last_render_time;
-                    last_render_time = now;
-                    
-                    state.update(dt);
-                    match state.render() {
-                        Ok(_) => {}
-                        // Reconfigure the surface if lost
-                        // Err(wgpu::SurfaceError::Lost) => { *control_flow = winit::event_loop::ControlFlow::Exit; },
-                        Err(wgpu::SurfaceError::Lost) => state.resize(state.get_size()),
-                        Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = winit::event_loop::ControlFlow::Exit,
-                        Err(e) => eprintln!("{:?}", e),
-                    }
-                }
-                winit::event::Event::MainEventsCleared => {
-                    // RedrawRequested will only trigger once, unless we manually request it
-                    window.request_redraw();
-                }
                 _ => {}
             }
         });
+
+        res.unwrap();
     }

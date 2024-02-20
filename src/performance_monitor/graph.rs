@@ -27,7 +27,7 @@ impl Graph {
     const NR_LINES: usize = 700 - (Self::OFFSET_X + Self::OFFSET_Y);
     const LINE_LENGTH: usize = 200;
 
-    const FPS_LINES: &[Vertex] = &[
+    const FPS_LINES: &'static [Vertex] = &[
         Vertex { position: [Self::OFFSET_X as f32,                         Self::OFFSET_Y as f32 as f32, 0.0] }, 
         Vertex { position: [Self::OFFSET_X as f32 + Self::NR_LINES as f32, Self::OFFSET_Y as f32 as f32, 0.0] },
         Vertex { position: [Self::OFFSET_X as f32,                         Self::OFFSET_Y as f32 + Self::LEN_PER_MICRO * Self::DURATION_120FPS.as_micros() as f32, 0.0] }, 

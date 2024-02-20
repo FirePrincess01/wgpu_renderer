@@ -4,18 +4,16 @@
 pub mod camera;
 pub mod depth_texture;
 
-use winit::window::Window;
-
-// use log::{info, trace, warn, error};
+use winit::{dpi::PhysicalSize, window::Window};
 
 pub trait WgpuRendererInterface{
     fn device(&mut self) -> &mut wgpu::Device;
     fn queue(&mut self) -> &mut wgpu::Queue;
 }
 
-pub struct WgpuRenderer
+pub struct WgpuRenderer<'a>
 {
-    surface: wgpu::Surface,
+    surface: wgpu::Surface<'a>,
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
@@ -23,24 +21,28 @@ pub struct WgpuRenderer
     depth_texture: depth_texture::DepthTexture,
 }
 
-impl WgpuRenderer
+impl<'a> WgpuRenderer<'a>
 {
-    pub async fn new(window: &Window) -> Self 
+    pub async fn new(window: &'a Window, present_mode: Option<wgpu::PresentMode>) -> Self 
     {
-        let size = window.inner_size();
+        let present_mode = present_mode.unwrap_or(wgpu::PresentMode::Fifo);
+
+        let size = PhysicalSize{width: 800, height: 600};
 
         // The instance is a handle to our GPU
         // Backends::all => Vulkan + Metal + DX12 + Browser WebGPU
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
+            flags: wgpu::InstanceFlags::default(),
             dx12_shader_compiler: Default::default(),
+            gles_minor_version: wgpu::Gles3MinorVersion::default(),
         });
 
         // # Safety
         //
         // The surface needs to live as long as the window that created it
         // State owns the window so this should be safe
-        let surface = unsafe { instance.create_surface(&window) }.unwrap();
+        let surface =  { instance.create_surface(window) }.unwrap();
 
         let adapter = instance.request_adapter(
             &wgpu::RequestAdapterOptions {
@@ -60,10 +62,10 @@ impl WgpuRenderer
 
         let (device, queue) = adapter.request_device(
             &wgpu::DeviceDescriptor {
-                features: wgpu::Features::empty(),
+                required_features: wgpu::Features::empty(),
                 // WebGL doesn't support all of wgpu's features, so if
                 // we're building for the web we'll have to disable some.
-                limits: if cfg!(target_arch = "wasm32") {
+                required_limits: if cfg!(target_arch = "wasm32") {
                     let mut defaults = wgpu::Limits::downlevel_webgl2_defaults();
                     defaults.max_texture_dimension_2d = 4096;
                     defaults
@@ -92,14 +94,14 @@ impl WgpuRenderer
             width: size.width,
             height: size.height,
             present_mode: {
-                if surface_caps.present_modes.len() >= 2 {
-                    // surface_caps.present_modes[0]  // vsync on
-                    surface_caps.present_modes[1]  // vsync off
+                if surface_caps.present_modes.contains(&present_mode) {
+                    present_mode
                 }
                 else {
-                    surface_caps.present_modes[0]
+                    wgpu::PresentMode::Fifo  // default, vsync on
                 }
-            },           
+            },     
+            desired_maximum_frame_latency: 2,      
             alpha_mode: surface_caps.alpha_modes[0],
             view_formats: vec![]
         };
@@ -116,6 +118,10 @@ impl WgpuRenderer
             size,
             depth_texture,
         }
+    }
+
+    pub fn size(&self) -> winit::dpi::PhysicalSize<u32> {
+        self.size
     }
 
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
@@ -150,7 +156,7 @@ impl WgpuRenderer
     }
 }
 
-impl WgpuRendererInterface for WgpuRenderer 
+impl<'a> WgpuRendererInterface for WgpuRenderer<'a>
 {
     fn device(&mut self) -> &mut wgpu::Device {
         &mut self.device
