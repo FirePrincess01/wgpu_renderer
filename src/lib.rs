@@ -1,3 +1,4 @@
+#![deny(unused_crate_dependencies)]
 
 pub mod vertex_color_shader;
 pub mod vertex_texture_shader;
