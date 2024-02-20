@@ -98,7 +98,7 @@ impl<'a> WgpuRenderer<'a>
                     present_mode
                 }
                 else {
-                    wgpu::PresentMode::Fifo  // default, vsync off
+                    wgpu::PresentMode::Fifo  // default, vsync on
                 }
             },     
             desired_maximum_frame_latency: 2,      
