@@ -27,7 +27,6 @@ impl<'a> WgpuRenderer<'a>
     {
         let present_mode = present_mode.unwrap_or(wgpu::PresentMode::Fifo);
 
-        // let size = window.inner_size();
         let size = PhysicalSize{width: 800, height: 600};
 
         // The instance is a handle to our GPU
@@ -44,8 +43,6 @@ impl<'a> WgpuRenderer<'a>
         // The surface needs to live as long as the window that created it
         // State owns the window so this should be safe
         let surface =  { instance.create_surface(window) }.unwrap();
-
-        
 
         let adapter = instance.request_adapter(
             &wgpu::RequestAdapterOptions {
@@ -101,7 +98,7 @@ impl<'a> WgpuRenderer<'a>
                     present_mode
                 }
                 else {
-                    wgpu::PresentMode::Fifo  // vsync off
+                    wgpu::PresentMode::Fifo  // default, vsync off
                 }
             },     
             desired_maximum_frame_latency: 2,      
@@ -113,10 +110,7 @@ impl<'a> WgpuRenderer<'a>
 
         let depth_texture = depth_texture::DepthTexture::create_depth_texture(&device, &config, "depth_texture");
 
-        // window.request_redraw();
-
         Self {
-            // window: &window,
             surface,
             device,
             queue,
