@@ -16,6 +16,17 @@ pub struct Texture {
 }
 
 impl Texture {
+    pub fn new_from_bytes(
+        wgpu_renderer: &mut impl renderer::WgpuRendererInterface,
+        texture_bind_group_layout: &TextureBindGroupLayout,
+        bytes: &[u8],
+        label: &str,
+        nr_mipmaps: u32,
+    ) -> Result<Self> {
+        let img = image::load_from_memory(bytes)?;
+        Self::new_with_mipmaps(wgpu_renderer, texture_bind_group_layout, &img.to_rgba8(), Some(label), nr_mipmaps)
+    }
+
     pub fn new(
         wgpu_renderer: &mut impl renderer::WgpuRendererInterface,
         texture_bind_group_layout: &TextureBindGroupLayout,
