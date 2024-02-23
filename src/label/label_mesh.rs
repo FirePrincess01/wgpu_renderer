@@ -1,5 +1,7 @@
 //! Creates a texture with a text label
 
+use crate::vertex_texture_shader::VertexTextureShaderDraw;
+
 use super::super::renderer::WgpuRendererInterface;
 use super::super::vertex_texture_shader::{
     Vertex, 
@@ -84,8 +86,10 @@ impl LabelMesh {
         self.instance_buffer.update(queue, &[instance_raw]);
     }
 
-    pub fn draw<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>)
-    {
+}
+
+impl VertexTextureShaderDraw for LabelMesh {
+    fn draw<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
         self.vertex_buffer.bind(render_pass);
         self.texture.bind(render_pass);
         self.index_buffer.bind(render_pass);
@@ -93,5 +97,4 @@ impl LabelMesh {
 
         render_pass.draw_indexed(0..self.index_buffer.size(), 0, 0..self.instance_buffer.size());
     }
-
 }
