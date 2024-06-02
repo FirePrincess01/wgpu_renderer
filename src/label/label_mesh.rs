@@ -21,7 +21,7 @@ pub struct LabelMesh {
 }
 
 impl LabelMesh {
-    pub fn new(wgpu_renderer: &mut impl WgpuRendererInterface, 
+    pub fn new(wgpu_renderer: &mut dyn WgpuRendererInterface, 
         texture_rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
         texture_bind_group_layout: &TextureBindGroupLayout,
         instance: &Instance) -> Self

@@ -17,7 +17,7 @@ pub struct Texture {
 
 impl Texture {
     pub fn new(
-        wgpu_renderer: &mut impl renderer::WgpuRendererInterface,
+        wgpu_renderer: &mut dyn renderer::WgpuRendererInterface,
         texture_bind_group_layout: &TextureBindGroupLayout,
         rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>, 
         label: Option<&str>
@@ -26,7 +26,7 @@ impl Texture {
     }
 
     pub fn new_with_mipmaps(
-        wgpu_renderer: &mut impl renderer::WgpuRendererInterface,
+        wgpu_renderer: &mut dyn renderer::WgpuRendererInterface,
         texture_bind_group_layout: &TextureBindGroupLayout,
         rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>, 
         label: Option<&str>,
