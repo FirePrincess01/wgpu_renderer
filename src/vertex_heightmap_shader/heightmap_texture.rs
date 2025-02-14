@@ -73,14 +73,14 @@ impl HeightmapTexture {
         let data = bytemuck::cast_slice(heightmap);
 
         queue.write_texture(
-            wgpu::ImageCopyTexture {
+            wgpu::TexelCopyTextureInfo {
                 aspect: wgpu::TextureAspect::All,
                 texture: &self.texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
             },
             data,
-            wgpu::ImageDataLayout {
+            wgpu::TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row:  Some(4 * self.width),
                 rows_per_image: Some(self.height,),

@@ -45,13 +45,15 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface>
 
 pub struct DefaultApplication<'a, ConcreteApplication: DefaultApplicationInterface> {
     state: Option<StateApplication<'a, ConcreteApplication>>,
+
+    last_render_time: std::time::Instant,
 }
 
 impl<'a, ConcreteApplication: DefaultApplicationInterface>
     DefaultApplication<'a, ConcreteApplication>
 {
     pub fn new() -> Self {
-        Self { state: None }
+        Self { state: None, last_render_time: std::time::Instant::now() }
     }
 }
 
@@ -127,7 +129,7 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::A
         window_id: winit::window::WindowId,
         event: winit::event::WindowEvent,
     ) {
-        let mut last_render_time = instant::Instant::now();
+        self.last_render_time = instant::Instant::now();
 
         let state = self.state.as_mut().unwrap();
         let window = state.window.as_ref();
@@ -141,95 +143,95 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::A
             }
 
             match event {
-                winit::event::WindowEvent::ActivationTokenDone { serial, token } => {}
+                winit::event::WindowEvent::ActivationTokenDone { serial: _, token: _ } => {}
                 winit::event::WindowEvent::Resized(physical_size) => {
                     log::info!("resize: {} {}", physical_size.width, physical_size.height);
                     wgpu_renderer.resize(physical_size);
                     app.resize(wgpu_renderer, physical_size);
                 }
-                winit::event::WindowEvent::Moved(physical_position) => {}
+                winit::event::WindowEvent::Moved(_physical_position) => {}
                 winit::event::WindowEvent::CloseRequested => {
                     event_loop.exit();
                 }
                 winit::event::WindowEvent::Destroyed => {}
-                winit::event::WindowEvent::DroppedFile(path_buf) => {}
-                winit::event::WindowEvent::HoveredFile(path_buf) => {}
+                winit::event::WindowEvent::DroppedFile(_path_buf) => {}
+                winit::event::WindowEvent::HoveredFile(_path_buf) => {}
                 winit::event::WindowEvent::HoveredFileCancelled => {}
                 winit::event::WindowEvent::Focused(_) => {}
                 winit::event::WindowEvent::KeyboardInput {
-                    device_id,
+                    device_id: _,
                     event:
                         winit::event::KeyEvent {
                             physical_key:
                                 winit::keyboard::PhysicalKey::Code(winit::keyboard::KeyCode::Escape),
-                            logical_key,
-                            text,
-                            location,
+                            logical_key: _,
+                            text: _,
+                            location: _,
                             state: winit::event::ElementState::Pressed,
-                            repeat,
+                            repeat: _,
                             ..
                         },
-                    is_synthetic,
+                    is_synthetic: _,
                 } => {
                     event_loop.exit();
                 }
-                winit::event::WindowEvent::ModifiersChanged(modifiers) => {}
-                winit::event::WindowEvent::Ime(ime) => {}
+                winit::event::WindowEvent::ModifiersChanged(_modifiers) => {}
+                winit::event::WindowEvent::Ime(_ime) => {}
                 winit::event::WindowEvent::CursorMoved {
-                    device_id,
-                    position,
+                    device_id: _,
+                    position: _,
                 } => {}
-                winit::event::WindowEvent::CursorEntered { device_id } => {}
-                winit::event::WindowEvent::CursorLeft { device_id } => {}
+                winit::event::WindowEvent::CursorEntered { device_id: _ } => {}
+                winit::event::WindowEvent::CursorLeft { device_id: _ } => {}
                 winit::event::WindowEvent::MouseWheel {
-                    device_id,
-                    delta,
-                    phase,
+                    device_id: _,
+                    delta: _,
+                    phase: _,
                 } => {}
                 winit::event::WindowEvent::MouseInput {
-                    device_id,
-                    state,
-                    button,
+                    device_id: _,
+                    state: _,
+                    button: _,
                 } => {}
                 winit::event::WindowEvent::PinchGesture {
-                    device_id,
-                    delta,
-                    phase,
+                    device_id: _,
+                    delta: _,
+                    phase: _,
                 } => {}
                 winit::event::WindowEvent::PanGesture {
-                    device_id,
-                    delta,
-                    phase,
+                    device_id: _,
+                    delta: _,
+                    phase: _,
                 } => {}
-                winit::event::WindowEvent::DoubleTapGesture { device_id } => {}
+                winit::event::WindowEvent::DoubleTapGesture { device_id: _ } => {}
                 winit::event::WindowEvent::RotationGesture {
-                    device_id,
-                    delta,
-                    phase,
+                    device_id: _,
+                    delta: _,
+                    phase: _,
                 } => {}
                 winit::event::WindowEvent::TouchpadPressure {
-                    device_id,
-                    pressure,
-                    stage,
+                    device_id: _,
+                    pressure: _,
+                    stage: _,
                 } => {}
                 winit::event::WindowEvent::AxisMotion {
-                    device_id,
-                    axis,
-                    value,
+                    device_id: _,
+                    axis: _,
+                    value: _,
                 } => {}
-                winit::event::WindowEvent::Touch(touch) => {}
+                winit::event::WindowEvent::Touch(_touch) => {}
                 winit::event::WindowEvent::ScaleFactorChanged {
                     scale_factor,
-                    inner_size_writer,
+                    inner_size_writer: _,
                 } => {
                     app.update_scale_factor(scale_factor as f32);
                 }
-                winit::event::WindowEvent::ThemeChanged(theme) => {}
+                winit::event::WindowEvent::ThemeChanged(_theme) => {}
                 winit::event::WindowEvent::Occluded(_) => {}
                 winit::event::WindowEvent::RedrawRequested => {
                     let now = instant::Instant::now();
-                    let dt = now - last_render_time;
-                    last_render_time = now;
+                    let dt = now - self.last_render_time;
+                    self.last_render_time = now;
 
                     app.update(wgpu_renderer, dt);
                     match app.render(wgpu_renderer) {
