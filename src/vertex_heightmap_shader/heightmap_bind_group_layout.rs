@@ -6,14 +6,11 @@ pub struct HeightmapBindGroupLayout {
 }
 
 impl HeightmapBindGroupLayout {
-
     pub fn new(device: &wgpu::Device) -> Self {
-
         // Texture
         let heightmap_bind_group_layout =
-        device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[wgpu::BindGroupLayoutEntry {
                     binding: 0,
                     visibility: wgpu::ShaderStages::VERTEX,
                     ty: wgpu::BindingType::Texture {
@@ -22,10 +19,9 @@ impl HeightmapBindGroupLayout {
                         sample_type: wgpu::TextureSampleType::Float { filterable: false },
                     },
                     count: None,
-                },
-            ],
-            label: Some("heightmap_bind_group_layout"),
-        });
+                }],
+                label: Some("heightmap_bind_group_layout"),
+            });
 
         Self {
             heightmap_bind_group_layout,
@@ -35,5 +31,4 @@ impl HeightmapBindGroupLayout {
     pub fn get(&self) -> &wgpu::BindGroupLayout {
         &self.heightmap_bind_group_layout
     }
-
 }

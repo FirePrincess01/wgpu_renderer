@@ -53,7 +53,10 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface>
     DefaultApplication<'a, ConcreteApplication>
 {
     pub fn new() -> Self {
-        Self { state: None, last_render_time: std::time::Instant::now() }
+        Self {
+            state: None,
+            last_render_time: std::time::Instant::now(),
+        }
     }
 }
 
@@ -143,7 +146,10 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::A
             }
 
             match event {
-                winit::event::WindowEvent::ActivationTokenDone { serial: _, token: _ } => {}
+                winit::event::WindowEvent::ActivationTokenDone {
+                    serial: _,
+                    token: _,
+                } => {}
                 winit::event::WindowEvent::Resized(physical_size) => {
                     log::info!("resize: {} {}", physical_size.width, physical_size.height);
                     wgpu_renderer.resize(physical_size);

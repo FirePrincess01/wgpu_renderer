@@ -26,9 +26,7 @@ impl InstanceRaw {
     pub fn new() -> Self {
         let model = glam::Mat4::IDENTITY.to_cols_array_2d();
 
-        Self {
-            model,
-        }
+        Self { model }
     }
 
     pub fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
@@ -72,11 +70,13 @@ impl InstanceRaw {
 impl Instance {
     #[allow(clippy::wrong_self_convention)]
     pub fn to_raw(&self) -> InstanceRaw {
-        // InstanceRaw { 
+        // InstanceRaw {
         //     model: (cgmath::Matrix4::from_translation(self.position) * cgmath::Matrix4::from(self.rotation)).into(),
         // }
-        InstanceRaw { 
-            model: (glam::Mat4::from_translation(self.position) * glam::Mat4::from_quat(self.rotation)).to_cols_array_2d(),
+        InstanceRaw {
+            model: (glam::Mat4::from_translation(self.position)
+                * glam::Mat4::from_quat(self.rotation))
+            .to_cols_array_2d(),
         }
     }
 }

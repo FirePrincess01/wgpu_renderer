@@ -3,7 +3,7 @@
 use instant::Duration;
 
 pub struct Fps {
-    duration : Duration,
+    duration: Duration,
     count: u32,
     fps: u32,
 }
@@ -17,8 +17,7 @@ impl Fps {
         }
     }
 
-    pub fn update(&mut self, dt: instant::Duration) 
-    {
+    pub fn update(&mut self, dt: instant::Duration) {
         self.duration += dt;
         self.count += 1;
 
@@ -35,4 +34,3 @@ impl Fps {
         self.fps
     }
 }
-

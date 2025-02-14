@@ -1,12 +1,15 @@
 //! Arranges gui elements horizontally
 
-use super::GuiElement;
 use super::gui_element::ChangePositionEvent;
 use super::gui_element::GuiElementInterface;
 use super::gui_element::MouseEventResult;
+use super::GuiElement;
 
-pub struct HorizontalLayout<ElementId, PressedId, ReleasedId> 
-where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
+pub struct HorizontalLayout<ElementId, PressedId, ReleasedId>
+where
+    ElementId: Copy,
+    PressedId: Copy,
+    ReleasedId: Copy,
 {
     elements: Vec<GuiElement<ElementId, PressedId, ReleasedId>>,
 
@@ -19,11 +22,13 @@ where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
     active: bool,
 }
 
-impl<ElementId, PressedId, ReleasedId> HorizontalLayout<ElementId, PressedId, ReleasedId> 
-where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
+impl<ElementId, PressedId, ReleasedId> HorizontalLayout<ElementId, PressedId, ReleasedId>
+where
+    ElementId: Copy,
+    PressedId: Copy,
+    ReleasedId: Copy,
 {
-    pub fn new(elements: Vec<GuiElement<ElementId, PressedId, ReleasedId>>) -> Self 
-    {
+    pub fn new(elements: Vec<GuiElement<ElementId, PressedId, ReleasedId>>) -> Self {
         let mut vertical_layout = Self {
             elements,
 
@@ -41,8 +46,7 @@ where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
     }
 
     fn calculate_element_size(&mut self) {
-
-        let mut width =  0;
+        let mut width = 0;
         let mut height = 0;
 
         for element in &mut self.elements {
@@ -56,13 +60,19 @@ where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
     }
 
     fn is_inside(&self, x: u32, y: u32) -> bool {
-        x >= self.abs_x && x < self.abs_x + self.width &&
-        y >= self.abs_y && y < self.abs_y + self.height 
+        x >= self.abs_x
+            && x < self.abs_x + self.width
+            && y >= self.abs_y
+            && y < self.abs_y + self.height
     }
 }
 
-impl<ElementId, PressedId, ReleasedId> GuiElementInterface<ElementId, PressedId, ReleasedId> for HorizontalLayout<ElementId, PressedId, ReleasedId> 
-where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
+impl<ElementId, PressedId, ReleasedId> GuiElementInterface<ElementId, PressedId, ReleasedId>
+    for HorizontalLayout<ElementId, PressedId, ReleasedId>
+where
+    ElementId: Copy,
+    PressedId: Copy,
+    ReleasedId: Copy,
 {
     fn width(&self) -> u32 {
         self.width
@@ -72,7 +82,7 @@ where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
         self.height
     }
 
-    fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec::<ChangePositionEvent<ElementId>>) {
+    fn resize(&mut self, abs_x: u32, abs_y: u32, res: &mut Vec<ChangePositionEvent<ElementId>>) {
         self.abs_x = abs_x;
         self.abs_y = abs_y;
         let mut delta_width = 0;
@@ -81,22 +91,27 @@ where ElementId: Copy, PressedId: Copy, ReleasedId:Copy
             let element = element.visit();
 
             let element_abs_x = abs_x + delta_width;
-            let element_abs_y = abs_y + self.height/2 - element.height()/2;
+            let element_abs_y = abs_y + self.height / 2 - element.height() / 2;
             element.resize(element_abs_x, element_abs_y, res);
 
             delta_width += element.width();
         }
     }
 
-    fn mouse_event(&mut self, abs_x: u32, abs_y: u32, pressed: bool, res: &mut MouseEventResult<PressedId, ReleasedId>)
-    {
+    fn mouse_event(
+        &mut self,
+        abs_x: u32,
+        abs_y: u32,
+        pressed: bool,
+        res: &mut MouseEventResult<PressedId, ReleasedId>,
+    ) {
         if !self.is_inside(abs_x, abs_y) && !self.active {
             return;
         }
 
         for element in &mut self.elements {
             let element = element.visit();
-            element.mouse_event(abs_x, abs_y, pressed, res);   
+            element.mouse_event(abs_x, abs_y, pressed, res);
         }
 
         self.active = res.consumed;

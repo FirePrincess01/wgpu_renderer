@@ -1,9 +1,8 @@
 //! The Texture used in the shader
 //!
 
-
-use super::texture_bind_group_layout::TextureBindGroupLayout;
 use super::super::renderer;
+use super::texture_bind_group_layout::TextureBindGroupLayout;
 use anyhow::*;
 use image::Rgba;
 
@@ -19,8 +18,8 @@ impl Texture {
     pub fn new(
         wgpu_renderer: &mut dyn renderer::WgpuRendererInterface,
         texture_bind_group_layout: &TextureBindGroupLayout,
-        rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>, 
-        label: Option<&str>
+        rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
+        label: Option<&str>,
     ) -> Result<Self> {
         Self::new_with_mipmaps(wgpu_renderer, texture_bind_group_layout, rgba, label, 1)
     }
@@ -28,7 +27,7 @@ impl Texture {
     pub fn new_with_mipmaps(
         wgpu_renderer: &mut dyn renderer::WgpuRendererInterface,
         texture_bind_group_layout: &TextureBindGroupLayout,
-        rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>, 
+        rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
         label: Option<&str>,
         nr_mipmaps: u32,
     ) -> Result<Self> {
@@ -39,8 +38,9 @@ impl Texture {
             depth_or_array_layers: 1,
         };
 
-        let texture = wgpu_renderer.device().create_texture(
-            &wgpu::TextureDescriptor {
+        let texture = wgpu_renderer
+            .device()
+            .create_texture(&wgpu::TextureDescriptor {
                 label,
                 size,
                 mip_level_count: nr_mipmaps,
@@ -49,14 +49,14 @@ impl Texture {
                 format: wgpu::TextureFormat::Rgba8UnormSrgb,
                 usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
                 view_formats: &[],
-            }
-        );
+            });
 
         Self::write_texture(wgpu_renderer.queue(), &texture, &rgba, nr_mipmaps);
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-        let sampler = wgpu_renderer.device().create_sampler(
-            &wgpu::SamplerDescriptor {
+        let sampler = wgpu_renderer
+            .device()
+            .create_sampler(&wgpu::SamplerDescriptor {
                 address_mode_u: wgpu::AddressMode::ClampToEdge,
                 address_mode_v: wgpu::AddressMode::ClampToEdge,
                 address_mode_w: wgpu::AddressMode::ClampToEdge,
@@ -64,11 +64,11 @@ impl Texture {
                 min_filter: wgpu::FilterMode::Linear,
                 mipmap_filter: wgpu::FilterMode::Linear,
                 ..Default::default()
-            }
-        );
+            });
 
-        let bind_group = wgpu_renderer.device().create_bind_group(
-            &wgpu::BindGroupDescriptor {
+        let bind_group = wgpu_renderer
+            .device()
+            .create_bind_group(&wgpu::BindGroupDescriptor {
                 layout: texture_bind_group_layout.get(),
                 entries: &[
                     wgpu::BindGroupEntry {
@@ -78,17 +78,26 @@ impl Texture {
                     wgpu::BindGroupEntry {
                         binding: 1,
                         resource: wgpu::BindingResource::Sampler(&sampler),
-                    }
+                    },
                 ],
                 label: Some("texture_bind_group"),
-            }
-        );
+            });
 
-        Ok(Self { texture, view, sampler, bind_group, nr_mipmaps })
+        Ok(Self {
+            texture,
+            view,
+            sampler,
+            bind_group,
+            nr_mipmaps,
+        })
     }
 
-    fn write_texture(queue: &wgpu::Queue, texture: &wgpu::Texture, rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>, nr_mipmaps: u32)
-    {
+    fn write_texture(
+        queue: &wgpu::Queue,
+        texture: &wgpu::Texture,
+        rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
+        nr_mipmaps: u32,
+    ) {
         let dimensions = rgba.dimensions();
         let size = wgpu::Extent3d {
             width: dimensions.0,
@@ -106,16 +115,17 @@ impl Texture {
             rgba,
             wgpu::TexelCopyBufferLayout {
                 offset: 0,
-                bytes_per_row:  Some(4 * dimensions.0),
+                bytes_per_row: Some(4 * dimensions.0),
                 rows_per_image: Some(dimensions.1),
             },
             size,
         );
-        if nr_mipmaps == 1 {return;}
+        if nr_mipmaps == 1 {
+            return;
+        }
 
         let mut small_image = Self::downsample(rgba);
 
-        
         for i in 1..nr_mipmaps {
             let dimensions = small_image.dimensions();
             let size = wgpu::Extent3d {
@@ -133,7 +143,7 @@ impl Texture {
                 &small_image,
                 wgpu::TexelCopyBufferLayout {
                     offset: 0,
-                    bytes_per_row:  Some(4 * dimensions.0),
+                    bytes_per_row: Some(4 * dimensions.0),
                     rows_per_image: Some(dimensions.1),
                 },
                 size,
@@ -145,8 +155,11 @@ impl Texture {
         }
     }
 
-    fn downsample(rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>) -> image::ImageBuffer<image::Rgba<u8>, Vec<u8>> {
-        let mut small_image: image::ImageBuffer<image::Rgba<u8>, Vec<u8>> = image::ImageBuffer::new(rgba.width()/2, rgba.height()/2);
+    fn downsample(
+        rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
+    ) -> image::ImageBuffer<image::Rgba<u8>, Vec<u8>> {
+        let mut small_image: image::ImageBuffer<image::Rgba<u8>, Vec<u8>> =
+            image::ImageBuffer::new(rgba.width() / 2, rgba.height() / 2);
         for x in 0..small_image.width() {
             for y in 0..small_image.height() {
                 let p1: Rgba<u8> = *rgba.get_pixel(2 * x, 2 * y);
@@ -159,21 +172,17 @@ impl Texture {
                 //     ((p1[2] as f32 * p1[2] as f32 + p2[2] as f32 * p2[2] as f32 + p3[2] as f32 * p3[2] as f32 + p4[2] as f32 * p4[2] as f32).sqrt() / 2.) as u8,
                 //     ((p1[3] as f32 * p1[3] as f32 + p2[3] as f32 * p2[3] as f32 + p3[3] as f32 * p3[3] as f32 + p4[3] as f32 * p4[3] as f32).sqrt() / 2.) as u8
                 //     ]);
-                small_image.put_pixel(x, y, p1);//averaged_pixel);
+                small_image.put_pixel(x, y, p1); //averaged_pixel);
             }
         }
         small_image
     }
 
-
-    pub fn write(&self, queue: &wgpu::Queue, rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>, ) 
-    {
+    pub fn write(&self, queue: &wgpu::Queue, rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>) {
         Self::write_texture(queue, &self.texture, rgba, self.nr_mipmaps);
     }
 
-    pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>,) {
+    pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
         render_pass.set_bind_group(1, &self.bind_group, &[]);
     }
-
 }
-

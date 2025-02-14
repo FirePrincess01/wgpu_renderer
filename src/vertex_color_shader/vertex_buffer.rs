@@ -9,23 +9,17 @@ pub struct VertexBuffer {
 }
 
 impl VertexBuffer {
-    pub fn new(device: &wgpu::Device, vertices: &[Vertex])  -> Self
-    {
-        let buffer = device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Vertex Buffer"),
-                contents: bytemuck::cast_slice(vertices),
-                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-            }
-        );
+    pub fn new(device: &wgpu::Device, vertices: &[Vertex]) -> Self {
+        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Vertex Buffer"),
+            contents: bytemuck::cast_slice(vertices),
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+        });
 
-        Self {
-            buffer
-        }
+        Self { buffer }
     }
 
-    pub fn update(&mut self, queue: &wgpu::Queue, vertices: &[Vertex])
-    {   
+    pub fn update(&mut self, queue: &wgpu::Queue, vertices: &[Vertex]) {
         let data = bytemuck::cast_slice(vertices);
 
         if self.buffer.size() == data.len() as u64 {
@@ -33,9 +27,7 @@ impl VertexBuffer {
         }
     }
 
-    pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>,) 
-    {
+    pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
         render_pass.set_vertex_buffer(0, self.buffer.slice(..));
     }
-
 }

@@ -2,38 +2,35 @@
 //!
 
 #[derive(Copy, Clone)]
-pub struct Watchpoint
-{
+pub struct Watchpoint {
     pub start: instant::Instant,
     pub stop: instant::Instant,
 }
 
 impl Watchpoint {
-
     fn new(t: instant::Instant) -> Self {
-        Self {
-            start: t,
-            stop: t,
-        }
+        Self { start: t, stop: t }
     }
 }
 
-pub struct Watch<const SIZE:usize>
-{
+pub struct Watch<const SIZE: usize> {
     last_update_time: instant::Instant,
     update_time: instant::Instant,
     watchpoints: [Watchpoint; SIZE],
 }
 
 pub trait Viewer {
-    fn update(&mut self, last_update_time: instant::Instant, update_time: instant::Instant, watchpoints: &[Watchpoint]);
+    fn update(
+        &mut self,
+        last_update_time: instant::Instant,
+        update_time: instant::Instant,
+        watchpoints: &[Watchpoint],
+    );
 }
 
-
-impl <const SIZE:usize> Watch<SIZE>{
-
+impl<const SIZE: usize> Watch<SIZE> {
     pub fn new() -> Self {
-        let now = instant::Instant::now();        
+        let now = instant::Instant::now();
         let last_update_time = now;
         let update_time = now;
         let watchpoints = [Watchpoint::new(now); SIZE];
@@ -67,9 +64,9 @@ impl <const SIZE:usize> Watch<SIZE>{
 
     fn validate(&mut self) {
         for i in 0..SIZE {
-            if self.watchpoints[i].start > self.watchpoints[i].stop ||
-               self.watchpoints[i].stop  > self.update_time ||
-               self.watchpoints[i].start > self.update_time  
+            if self.watchpoints[i].start > self.watchpoints[i].stop
+                || self.watchpoints[i].stop > self.update_time
+                || self.watchpoints[i].start > self.update_time
             {
                 self.watchpoints[i].stop = self.update_time;
                 self.watchpoints[i].start = self.update_time;
@@ -81,5 +78,4 @@ impl <const SIZE:usize> Watch<SIZE>{
         self.validate();
         viewer.update(self.last_update_time, self.update_time, &self.watchpoints);
     }
-
 }

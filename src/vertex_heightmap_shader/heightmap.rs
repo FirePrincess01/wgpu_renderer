@@ -1,7 +1,6 @@
 //! The Heightmap struct used in the shader
 //!
 
-
 #[repr(C)]
 #[derive(Debug, Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Heightmap {

@@ -8,19 +8,18 @@ use std::sync::Arc;
 
 use winit::{dpi::PhysicalSize, window::Window};
 
-pub trait WgpuRendererInterface{
+pub trait WgpuRendererInterface {
     fn device(&mut self) -> &mut wgpu::Device;
     fn queue(&mut self) -> &mut wgpu::Queue;
 
     fn surface_width(&self) -> u32;
     fn surface_height(&self) -> u32;
     fn surface_format(&self) -> wgpu::TextureFormat;
-    fn get_depth_texture_view(&self) ->  &wgpu::TextureView;
-    fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError> ;
+    fn get_depth_texture_view(&self) -> &wgpu::TextureView;
+    fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError>;
 }
 
-pub struct WgpuRenderer<'a>
-{
+pub struct WgpuRenderer<'a> {
     surface: wgpu::Surface<'a>,
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -29,13 +28,14 @@ pub struct WgpuRenderer<'a>
     depth_texture: depth_texture::DepthTexture,
 }
 
-impl<'a> WgpuRenderer<'a>
-{
-    pub async fn new(window: Arc<Window>, present_mode: Option<wgpu::PresentMode>) -> Self 
-    {
+impl<'a> WgpuRenderer<'a> {
+    pub async fn new(window: Arc<Window>, present_mode: Option<wgpu::PresentMode>) -> Self {
         let present_mode = present_mode.unwrap_or(wgpu::PresentMode::Fifo);
 
-        let size = PhysicalSize{width: 800, height: 600};
+        let size = PhysicalSize {
+            width: 800,
+            height: 600,
+        };
 
         // The instance is a handle to our GPU
         // Backends::all => Vulkan + Metal + DX12 + Browser WebGPU
@@ -51,15 +51,16 @@ impl<'a> WgpuRenderer<'a>
         //
         // The surface needs to live as long as the window that created it
         // State owns the window so this should be safe
-        let surface =  { instance.create_surface(window) }.unwrap();
+        let surface = { instance.create_surface(window) }.unwrap();
 
-        let adapter = instance.request_adapter(
-            &wgpu::RequestAdapterOptions {
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
-            }
-        ).await.unwrap();
+            })
+            .await
+            .unwrap();
 
         // let downlevel_capabilities = adapter.get_downlevel_capabilities();
         // let downlevel_flags = downlevel_capabilities.flags;
@@ -69,33 +70,38 @@ impl<'a> WgpuRenderer<'a>
         // log::error!("vertex storage: {}", vertex_storage);
         // log::error!("compute shader: {}", compute_shader);
 
-        let (device, queue) = adapter.request_device(
-            &wgpu::DeviceDescriptor {
-                required_features: wgpu::Features::empty(),
-                // WebGL doesn't support all of wgpu's features, so if
-                // we're building for the web we'll have to disable some.
-                required_limits: if cfg!(target_arch = "wasm32") {
-                    let mut defaults = wgpu::Limits::downlevel_webgl2_defaults();
-                    defaults.max_texture_dimension_2d = 4096;
-                    defaults.max_color_attachment_bytes_per_sample = 64;
-                    defaults
-                } else {
-                    let mut defaults = wgpu::Limits::default();
-                    defaults.max_color_attachment_bytes_per_sample = 64;
-                    defaults
+        let (device, queue) = adapter
+            .request_device(
+                &wgpu::DeviceDescriptor {
+                    required_features: wgpu::Features::empty(),
+                    // WebGL doesn't support all of wgpu's features, so if
+                    // we're building for the web we'll have to disable some.
+                    required_limits: if cfg!(target_arch = "wasm32") {
+                        let mut defaults = wgpu::Limits::downlevel_webgl2_defaults();
+                        defaults.max_texture_dimension_2d = 4096;
+                        defaults.max_color_attachment_bytes_per_sample = 64;
+                        defaults
+                    } else {
+                        let mut defaults = wgpu::Limits::default();
+                        defaults.max_color_attachment_bytes_per_sample = 64;
+                        defaults
+                    },
+                    label: None,
+                    memory_hints: wgpu::MemoryHints::default(),
                 },
-                label: None,
-                memory_hints: wgpu::MemoryHints::default(),
-            },
-            None, 
-        ).await.unwrap();
+                None,
+            )
+            .await
+            .unwrap();
 
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code in this tutorial assumes an sRGB surface texture. Using a different
         // one will result all the colors coming out darker. If you want to support non
         // sRGB surfaces, you'll need to account fo that when drawing to the frame.
         #[allow(clippy::filter_next)]
-        let surface_format = surface_caps.formats.iter()
+        let surface_format = surface_caps
+            .formats
+            .iter()
             .copied()
             .filter(|f| f.is_srgb())
             .next()
@@ -109,19 +115,19 @@ impl<'a> WgpuRenderer<'a>
             present_mode: {
                 if surface_caps.present_modes.contains(&present_mode) {
                     present_mode
+                } else {
+                    wgpu::PresentMode::Fifo // default, vsync on
                 }
-                else {
-                    wgpu::PresentMode::Fifo  // default, vsync on
-                }
-            },     
-            desired_maximum_frame_latency: 2,      
+            },
+            desired_maximum_frame_latency: 2,
             alpha_mode: surface_caps.alpha_modes[0],
-            view_formats: vec![]
+            view_formats: vec![],
         };
 
         surface.configure(&device, &config);
 
-        let depth_texture = depth_texture::DepthTexture::create_depth_texture(&device, &config, "depth_texture");
+        let depth_texture =
+            depth_texture::DepthTexture::create_depth_texture(&device, &config, "depth_texture");
 
         Self {
             surface,
@@ -142,7 +148,11 @@ impl<'a> WgpuRenderer<'a>
             self.size = new_size;
             self.config.width = new_size.width;
             self.config.height = new_size.height;
-            self.depth_texture = depth_texture::DepthTexture::create_depth_texture(&self.device, &self.config, "depth_texture");
+            self.depth_texture = depth_texture::DepthTexture::create_depth_texture(
+                &self.device,
+                &self.config,
+                "depth_texture",
+            );
             self.surface.configure(&self.device, &self.config)
         }
     }
@@ -160,7 +170,6 @@ impl<'a> WgpuRenderer<'a>
     }
 
     pub fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError> {
-        
         self.surface.get_current_texture()
     }
 
@@ -169,8 +178,7 @@ impl<'a> WgpuRenderer<'a>
     }
 }
 
-impl<'a> WgpuRendererInterface for WgpuRenderer<'a>
-{
+impl<'a> WgpuRendererInterface for WgpuRenderer<'a> {
     fn device(&mut self) -> &mut wgpu::Device {
         &mut self.device
     }
@@ -178,24 +186,24 @@ impl<'a> WgpuRendererInterface for WgpuRenderer<'a>
     fn queue(&mut self) -> &mut wgpu::Queue {
         &mut self.queue
     }
-    
+
     fn surface_width(&self) -> u32 {
         self.config.width
     }
-    
+
     fn surface_height(&self) -> u32 {
         self.config.height
     }
-    
+
     fn surface_format(&self) -> wgpu::TextureFormat {
         self.config.format
     }
-    
-    fn get_depth_texture_view(&self) ->  &wgpu::TextureView {
+
+    fn get_depth_texture_view(&self) -> &wgpu::TextureView {
         &self.depth_texture.view
     }
-    
-    fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError>  {
+
+    fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError> {
         self.surface.get_current_texture()
     }
 }

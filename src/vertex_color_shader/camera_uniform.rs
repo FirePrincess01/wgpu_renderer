@@ -27,10 +27,11 @@ impl CameraUniform {
     //     self.view_proj = camera.build_view_projection_matrix().into();
     // }
 
-    pub fn update_view_proj(&mut self, 
-        camera: &renderer::camera::Camera, 
-        projection: &renderer::camera::Projection) 
-    {
+    pub fn update_view_proj(
+        &mut self,
+        camera: &renderer::camera::Camera,
+        projection: &renderer::camera::Projection,
+    ) {
         self.view_position = camera.position.to_homogeneous().into();
         self.view_proj = (projection.calc_matrix() * camera.calc_matrix()).into();
     }

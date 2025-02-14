@@ -19,13 +19,7 @@ pub struct Projection {
 }
 
 impl Projection {
-    pub fn new<F: Into<Rad<f32>>>(
-        width: u32,
-        height: u32,
-        fovy: F,
-        znear: f32,
-        zfar: f32,
-    ) -> Self {
+    pub fn new<F: Into<Rad<f32>>>(width: u32, height: u32, fovy: F, znear: f32, zfar: f32) -> Self {
         Self {
             aspect: width as f32 / height as f32,
             fovy: fovy.into(),
@@ -42,7 +36,3 @@ impl Projection {
         OPENGL_TO_WGPU_MATRIX * perspective(self.fovy, self.aspect, self.znear, self.zfar)
     }
 }
-
- 
-
- 

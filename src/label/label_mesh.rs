@@ -4,13 +4,7 @@ use crate::vertex_texture_shader::VertexTextureShaderDraw;
 
 use super::super::renderer::WgpuRendererInterface;
 use super::super::vertex_texture_shader::{
-    Vertex, 
-    VertexBuffer, 
-    Texture, 
-    IndexBuffer, 
-    InstanceBuffer, 
-    Instance, 
-    TextureBindGroupLayout
+    IndexBuffer, Instance, InstanceBuffer, Texture, TextureBindGroupLayout, Vertex, VertexBuffer,
 };
 
 pub struct LabelMesh {
@@ -21,23 +15,26 @@ pub struct LabelMesh {
 }
 
 impl LabelMesh {
-    pub fn new(wgpu_renderer: &mut dyn WgpuRendererInterface, 
+    pub fn new(
+        wgpu_renderer: &mut dyn WgpuRendererInterface,
         texture_rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
         texture_bind_group_layout: &TextureBindGroupLayout,
-        instance: &Instance) -> Self
-    {
+        instance: &Instance,
+    ) -> Self {
         let width = texture_rgba.width();
         let height = texture_rgba.height();
 
-        let vertex_buffer = VertexBuffer::new(wgpu_renderer.device(), 
-            &Self::vertices(width, height));
+        let vertex_buffer =
+            VertexBuffer::new(wgpu_renderer.device(), &Self::vertices(width, height));
         let index_buffer = IndexBuffer::new(wgpu_renderer.device(), &Self::indices());
 
         let texture = Texture::new(
-            wgpu_renderer, 
-            &texture_bind_group_layout, 
-            &texture_rgba, 
-            Some("gui texture")).unwrap(); 
+            wgpu_renderer,
+            &texture_bind_group_layout,
+            &texture_rgba,
+            Some("gui texture"),
+        )
+        .unwrap();
 
         let instance_raw = instance.to_raw();
         let instance_buffer = InstanceBuffer::new(wgpu_renderer.device(), &[instance_raw]);
@@ -50,42 +47,50 @@ impl LabelMesh {
         }
     }
 
-    fn vertices(width: u32, height: u32) -> [Vertex; 4]
-    {
+    fn vertices(width: u32, height: u32) -> [Vertex; 4] {
         let width = width as f32;
         let height = height as f32;
 
         let vertices: [Vertex; 4] = [
-            Vertex { position: [0.0, 0.0, 0.0], tex_coords: [0.0, 1.0] }, // A
-            Vertex { position: [width, 0.0, 0.0], tex_coords: [1.0, 1.0] }, // B
-            Vertex { position: [width, height, 0.0], tex_coords: [1.0, 0.0] }, // C
-            Vertex { position: [0.0, height, 0.0], tex_coords: [0.0, 0.0] }, // D
+            Vertex {
+                position: [0.0, 0.0, 0.0],
+                tex_coords: [0.0, 1.0],
+            }, // A
+            Vertex {
+                position: [width, 0.0, 0.0],
+                tex_coords: [1.0, 1.0],
+            }, // B
+            Vertex {
+                position: [width, height, 0.0],
+                tex_coords: [1.0, 0.0],
+            }, // C
+            Vertex {
+                position: [0.0, height, 0.0],
+                tex_coords: [0.0, 0.0],
+            }, // D
         ];
 
         vertices
     }
 
-    fn indices() -> [u32; 6]
-    {
-        const INDICES: [u32;6] = [
-            0, 1, 2,
-            2, 3, 0,
-        ];
+    fn indices() -> [u32; 6] {
+        const INDICES: [u32; 6] = [0, 1, 2, 2, 3, 0];
 
         INDICES
     }
 
-    pub fn update_texture(&mut self, queue: &wgpu::Queue, rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>) 
-    {
+    pub fn update_texture(
+        &mut self,
+        queue: &wgpu::Queue,
+        rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
+    ) {
         self.texture.write(queue, rgba)
     }
 
-    pub fn update_instance_buffer(&mut self, queue: &wgpu::Queue, instance: &Instance)
-    {
+    pub fn update_instance_buffer(&mut self, queue: &wgpu::Queue, instance: &Instance) {
         let instance_raw = instance.to_raw();
         self.instance_buffer.update(queue, &[instance_raw]);
     }
-
 }
 
 impl VertexTextureShaderDraw for LabelMesh {
@@ -95,6 +100,10 @@ impl VertexTextureShaderDraw for LabelMesh {
         self.index_buffer.bind(render_pass);
         self.instance_buffer.bind_slot(render_pass, 1);
 
-        render_pass.draw_indexed(0..self.index_buffer.size(), 0, 0..self.instance_buffer.size());
+        render_pass.draw_indexed(
+            0..self.index_buffer.size(),
+            0,
+            0..self.instance_buffer.size(),
+        );
     }
 }
