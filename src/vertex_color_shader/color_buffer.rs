@@ -9,23 +9,17 @@ pub struct ColorBuffer {
 }
 
 impl ColorBuffer {
-    pub fn new(device: &wgpu::Device, colors: &[Color])  -> Self
-    {
-        let buffer = device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("Color Buffer"),
-                contents: bytemuck::cast_slice(colors),
-                usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-            }
-        );
+    pub fn new(device: &wgpu::Device, colors: &[Color]) -> Self {
+        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Color Buffer"),
+            contents: bytemuck::cast_slice(colors),
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+        });
 
-        Self {
-            buffer
-        }
+        Self { buffer }
     }
 
-    pub fn update(&mut self, queue: &wgpu::Queue, colors: &[Color])
-    {   
+    pub fn update(&mut self, queue: &wgpu::Queue, colors: &[Color]) {
         let data = bytemuck::cast_slice(colors);
 
         if self.buffer.size() == data.len() as u64 {
@@ -33,9 +27,7 @@ impl ColorBuffer {
         }
     }
 
-    pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>,) 
-    {
+    pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
         render_pass.set_vertex_buffer(1, self.buffer.slice(..));
     }
-
 }

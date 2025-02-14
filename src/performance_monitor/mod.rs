@@ -1,11 +1,11 @@
 //! Draws a performance graph of the application
 //!
 
-mod watch;
+mod fps;
 mod graph;
 mod orthographic_uniform;
-mod fps;
+mod watch;
 
-pub use watch::Watch;
-pub use graph::Graph;
 pub use fps::Fps;
+pub use graph::Graph;
+pub use watch::Watch;
