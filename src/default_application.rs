@@ -131,8 +131,8 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::A
 
         let state = self.state.as_mut().unwrap();
         let window = state.window.as_ref();
-        let mut wgpu_renderer = &mut state.wgpu_renderer;
-        let mut app = &mut state.app;
+        let wgpu_renderer = &mut state.wgpu_renderer;
+        let app = &mut state.app;
 
         if window.id() == window_id {
             if app.input(&event) {
