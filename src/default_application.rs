@@ -46,7 +46,7 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface>
 pub struct DefaultApplication<'a, ConcreteApplication: DefaultApplicationInterface> {
     state: Option<StateApplication<'a, ConcreteApplication>>,
 
-    last_render_time: std::time::Instant,
+    last_render_time: instant::Instant,
 }
 
 impl<'a, ConcreteApplication: DefaultApplicationInterface>
@@ -55,7 +55,7 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface>
     pub fn new() -> Self {
         Self {
             state: None,
-            last_render_time: std::time::Instant::now(),
+            last_render_time: instant::Instant::now(),
         }
     }
 }
