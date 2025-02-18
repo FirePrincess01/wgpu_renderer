@@ -119,6 +119,7 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::A
         };
 
         self.state = Some(state);
+        self.last_render_time = instant::Instant::now();
     }
 
     fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
@@ -132,8 +133,6 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::A
         window_id: winit::window::WindowId,
         event: winit::event::WindowEvent,
     ) {
-        self.last_render_time = instant::Instant::now();
-
         let state = self.state.as_mut().unwrap();
         let window = state.window.as_ref();
         let wgpu_renderer = &mut state.wgpu_renderer;
