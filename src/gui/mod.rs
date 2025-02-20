@@ -21,8 +21,6 @@ pub use vertical_layout::VerticalLayout;
 #[derive(Copy, Clone)]
 pub enum NoId {}
 
-
-
 //
 // (x:0, y:height)   (x:width, y:height)
 //     ---------------

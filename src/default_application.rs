@@ -35,9 +35,7 @@ pub struct StateApplication<'a, ConcreteApplication: DefaultApplicationInterface
     app: ConcreteApplication,
 }
 
-impl<ConcreteApplication: DefaultApplicationInterface>
-    StateApplication<'_, ConcreteApplication>
-{
+impl<ConcreteApplication: DefaultApplicationInterface> StateApplication<'_, ConcreteApplication> {
     fn window(&self) -> &window::Window {
         &self.window
     }
@@ -49,15 +47,15 @@ pub struct DefaultApplication<'a, ConcreteApplication: DefaultApplicationInterfa
     last_render_time: instant::Instant,
 }
 
-impl<ConcreteApplication: DefaultApplicationInterface> Default for DefaultApplication<'_, ConcreteApplication> {
+impl<ConcreteApplication: DefaultApplicationInterface> Default
+    for DefaultApplication<'_, ConcreteApplication>
+{
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<ConcreteApplication: DefaultApplicationInterface>
-    DefaultApplication<'_, ConcreteApplication>
-{
+impl<ConcreteApplication: DefaultApplicationInterface> DefaultApplication<'_, ConcreteApplication> {
     pub fn new() -> Self {
         Self {
             state: None,
