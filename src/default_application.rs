@@ -49,7 +49,7 @@ pub struct DefaultApplication<'a, ConcreteApplication: DefaultApplicationInterfa
     last_render_time: instant::Instant,
 }
 
-impl<'a, ConcreteApplication: DefaultApplicationInterface> Default for DefaultApplication<'a, ConcreteApplication> {
+impl<ConcreteApplication: DefaultApplicationInterface> Default for DefaultApplication<'_, ConcreteApplication> {
     fn default() -> Self {
         Self::new()
     }
