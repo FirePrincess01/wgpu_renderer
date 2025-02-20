@@ -83,7 +83,7 @@ impl Graph {
         let mut indices = vec![0_u32; line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
 
         // vertices
-        vertices[..Self::FPS_LINES.len()].copy_from_slice(&Self::FPS_LINES[..]);
+        vertices[..Self::FPS_LINES.len()].copy_from_slice(Self::FPS_LINES);
 
         // colors
         let gradient = colorous::RAINBOW;
