@@ -28,12 +28,12 @@ impl Graph {
 
     const FPS_LINES: &'static [Vertex] = &[
         Vertex {
-            position: [Self::OFFSET_X as f32, Self::OFFSET_Y as f32 as f32, 0.0],
+            position: [Self::OFFSET_X as f32, Self::OFFSET_Y as f32, 0.0],
         },
         Vertex {
             position: [
                 Self::OFFSET_X as f32 + Self::NR_LINES as f32,
-                Self::OFFSET_Y as f32 as f32,
+                Self::OFFSET_Y as f32,
                 0.0,
             ],
         },
@@ -83,9 +83,7 @@ impl Graph {
         let mut indices = vec![0_u32; line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
 
         // vertices
-        for i in 0..Self::FPS_LINES.len() {
-            vertices[i] = Self::FPS_LINES[i];
-        }
+        vertices[..Self::FPS_LINES.len()].copy_from_slice(Self::FPS_LINES);
 
         // colors
         let gradient = colorous::RAINBOW;

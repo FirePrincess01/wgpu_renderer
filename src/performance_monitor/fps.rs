@@ -8,6 +8,12 @@ pub struct Fps {
     fps: u32,
 }
 
+impl Default for Fps {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Fps {
     pub fn new() -> Self {
         Self {

@@ -28,6 +28,12 @@ pub trait Viewer {
     );
 }
 
+impl<const SIZE: usize> Default for Watch<SIZE> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<const SIZE: usize> Watch<SIZE> {
     pub fn new() -> Self {
         let now = instant::Instant::now();

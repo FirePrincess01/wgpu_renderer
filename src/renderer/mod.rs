@@ -28,7 +28,7 @@ pub struct WgpuRenderer<'a> {
     depth_texture: depth_texture::DepthTexture,
 }
 
-impl<'a> WgpuRenderer<'a> {
+impl WgpuRenderer<'_> {
     pub async fn new(window: Arc<Window>, present_mode: Option<wgpu::PresentMode>) -> Self {
         let present_mode = present_mode.unwrap_or(wgpu::PresentMode::Fifo);
 
@@ -82,9 +82,10 @@ impl<'a> WgpuRenderer<'a> {
                         defaults.max_color_attachment_bytes_per_sample = 64;
                         defaults
                     } else {
-                        let mut defaults = wgpu::Limits::default();
-                        defaults.max_color_attachment_bytes_per_sample = 64;
-                        defaults
+                        wgpu::Limits {
+                            max_color_attachment_bytes_per_sample: 64,
+                            ..Default::default()
+                        }
                     },
                     label: None,
                     memory_hints: wgpu::MemoryHints::default(),
@@ -97,7 +98,7 @@ impl<'a> WgpuRenderer<'a> {
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code in this tutorial assumes an sRGB surface texture. Using a different
         // one will result all the colors coming out darker. If you want to support non
-        // sRGB surfaces, you'll need to account fo that when drawing to the frame.
+        // sRGB surfaces, you'll need to account to that when drawing to the frame.
         #[allow(clippy::filter_next)]
         let surface_format = surface_caps
             .formats
@@ -178,7 +179,7 @@ impl<'a> WgpuRenderer<'a> {
     }
 }
 
-impl<'a> WgpuRendererInterface for WgpuRenderer<'a> {
+impl WgpuRendererInterface for WgpuRenderer<'_> {
     fn device(&mut self) -> &mut wgpu::Device {
         &mut self.device
     }

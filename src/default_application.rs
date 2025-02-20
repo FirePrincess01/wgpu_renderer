@@ -35,9 +35,7 @@ pub struct StateApplication<'a, ConcreteApplication: DefaultApplicationInterface
     app: ConcreteApplication,
 }
 
-impl<'a, ConcreteApplication: DefaultApplicationInterface>
-    StateApplication<'a, ConcreteApplication>
-{
+impl<ConcreteApplication: DefaultApplicationInterface> StateApplication<'_, ConcreteApplication> {
     fn window(&self) -> &window::Window {
         &self.window
     }
@@ -46,22 +44,28 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface>
 pub struct DefaultApplication<'a, ConcreteApplication: DefaultApplicationInterface> {
     state: Option<StateApplication<'a, ConcreteApplication>>,
 
-    last_render_time: std::time::Instant,
+    last_render_time: instant::Instant,
 }
 
-impl<'a, ConcreteApplication: DefaultApplicationInterface>
-    DefaultApplication<'a, ConcreteApplication>
+impl<ConcreteApplication: DefaultApplicationInterface> Default
+    for DefaultApplication<'_, ConcreteApplication>
 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<ConcreteApplication: DefaultApplicationInterface> DefaultApplication<'_, ConcreteApplication> {
     pub fn new() -> Self {
         Self {
             state: None,
-            last_render_time: std::time::Instant::now(),
+            last_render_time: instant::Instant::now(),
         }
     }
 }
 
-impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::ApplicationHandler
-    for DefaultApplication<'a, ConcreteApplication>
+impl<ConcreteApplication: DefaultApplicationInterface> winit::application::ApplicationHandler
+    for DefaultApplication<'_, ConcreteApplication>
 {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
         // We need to toggle what logger we are using based on if we are in WASM land or not.
@@ -119,6 +123,7 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::A
         };
 
         self.state = Some(state);
+        self.last_render_time = instant::Instant::now();
     }
 
     fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
@@ -132,8 +137,6 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::A
         window_id: winit::window::WindowId,
         event: winit::event::WindowEvent,
     ) {
-        self.last_render_time = instant::Instant::now();
-
         let state = self.state.as_mut().unwrap();
         let window = state.window.as_ref();
         let wgpu_renderer = &mut state.wgpu_renderer;

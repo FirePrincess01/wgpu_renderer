@@ -1,5 +1,7 @@
 //! Unit tests
 
+use crate::gui;
+
 use super::*;
 
 #[derive(Debug, PartialEq, Copy, Clone)]

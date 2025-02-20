@@ -30,8 +30,8 @@ impl LabelMesh {
 
         let texture = Texture::new(
             wgpu_renderer,
-            &texture_bind_group_layout,
-            &texture_rgba,
+            texture_bind_group_layout,
+            texture_rgba,
             Some("gui texture"),
         )
         .unwrap();
