@@ -28,12 +28,12 @@ impl Graph {
 
     const FPS_LINES: &'static [Vertex] = &[
         Vertex {
-            position: [Self::OFFSET_X as f32, Self::OFFSET_Y as f32 as f32, 0.0],
+            position: [Self::OFFSET_X as f32, Self::OFFSET_Y as f32, 0.0],
         },
         Vertex {
             position: [
                 Self::OFFSET_X as f32 + Self::NR_LINES as f32,
-                Self::OFFSET_Y as f32 as f32,
+                Self::OFFSET_Y as f32,
                 0.0,
             ],
         },

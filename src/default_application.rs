@@ -35,8 +35,8 @@ pub struct StateApplication<'a, ConcreteApplication: DefaultApplicationInterface
     app: ConcreteApplication,
 }
 
-impl<'a, ConcreteApplication: DefaultApplicationInterface>
-    StateApplication<'a, ConcreteApplication>
+impl<ConcreteApplication: DefaultApplicationInterface>
+    StateApplication<'_, ConcreteApplication>
 {
     fn window(&self) -> &window::Window {
         &self.window
@@ -49,8 +49,14 @@ pub struct DefaultApplication<'a, ConcreteApplication: DefaultApplicationInterfa
     last_render_time: instant::Instant,
 }
 
-impl<'a, ConcreteApplication: DefaultApplicationInterface>
-    DefaultApplication<'a, ConcreteApplication>
+impl<'a, ConcreteApplication: DefaultApplicationInterface> Default for DefaultApplication<'a, ConcreteApplication> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<ConcreteApplication: DefaultApplicationInterface>
+    DefaultApplication<'_, ConcreteApplication>
 {
     pub fn new() -> Self {
         Self {
@@ -60,8 +66,8 @@ impl<'a, ConcreteApplication: DefaultApplicationInterface>
     }
 }
 
-impl<'a, ConcreteApplication: DefaultApplicationInterface> winit::application::ApplicationHandler
-    for DefaultApplication<'a, ConcreteApplication>
+impl<ConcreteApplication: DefaultApplicationInterface> winit::application::ApplicationHandler
+    for DefaultApplication<'_, ConcreteApplication>
 {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
         // We need to toggle what logger we are using based on if we are in WASM land or not.

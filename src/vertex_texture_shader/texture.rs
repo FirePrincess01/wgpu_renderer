@@ -51,7 +51,7 @@ impl Texture {
                 view_formats: &[],
             });
 
-        Self::write_texture(wgpu_renderer.queue(), &texture, &rgba, nr_mipmaps);
+        Self::write_texture(wgpu_renderer.queue(), &texture, rgba, nr_mipmaps);
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
         let sampler = wgpu_renderer
@@ -108,7 +108,7 @@ impl Texture {
         queue.write_texture(
             wgpu::TexelCopyTextureInfo {
                 aspect: wgpu::TextureAspect::All,
-                texture: texture,
+                texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
             },
@@ -136,7 +136,7 @@ impl Texture {
             queue.write_texture(
                 wgpu::TexelCopyTextureInfo {
                     aspect: wgpu::TextureAspect::All,
-                    texture: texture,
+                    texture,
                     mip_level: i,
                     origin: wgpu::Origin3d::ZERO,
                 },

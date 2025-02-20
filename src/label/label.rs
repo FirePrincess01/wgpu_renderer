@@ -41,7 +41,7 @@ impl Label {
         for glyph in glyphs {
             let scaled_glyph = glyph.unpositioned();
             let horizontal_metrics = scaled_glyph.h_metrics();
-            width = width + horizontal_metrics.advance_width;
+            width += horizontal_metrics.advance_width;
         }
 
         width as u32
@@ -69,7 +69,7 @@ impl Label {
     fn clear_image(image: &mut image::ImageBuffer<image::Rgba<u8>, Vec<u8>>) {
         // let bla = image.enumerate_pixels();
         for (_x, _y, val) in image.enumerate_pixels_mut() {
-            *val = image::Rgba([0, 0, 0, 0 as u8]);
+            *val = image::Rgba([0, 0, 0, 0_u8]);
         }
     }
 
@@ -101,7 +101,7 @@ impl Label {
         }
     }
 
-    pub fn update<'a>(&mut self, font: &'a rusttype::Font, text: &str) {
+    pub fn update(&mut self, font: &rusttype::Font, text: &str) {
         let glyphs =
             Self::create_glyphs(font, self.scale, self.border, self.vertical_metrics, text);
 

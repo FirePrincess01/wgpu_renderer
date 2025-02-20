@@ -51,7 +51,7 @@ where
 
         for element in &mut self.elements {
             let element = element.visit();
-            width = width + element.width();
+            width += element.width();
             height = height.max(element.height());
         }
 

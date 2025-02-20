@@ -22,6 +22,12 @@ pub struct InstanceRaw {
     model: [[f32; 4]; 4],
 }
 
+impl Default for InstanceRaw {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl InstanceRaw {
     pub fn new() -> Self {
         let model = glam::Mat4::IDENTITY.to_cols_array_2d();

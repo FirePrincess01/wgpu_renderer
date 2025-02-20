@@ -28,7 +28,7 @@ pub struct WgpuRenderer<'a> {
     depth_texture: depth_texture::DepthTexture,
 }
 
-impl<'a> WgpuRenderer<'a> {
+impl WgpuRenderer<'_> {
     pub async fn new(window: Arc<Window>, present_mode: Option<wgpu::PresentMode>) -> Self {
         let present_mode = present_mode.unwrap_or(wgpu::PresentMode::Fifo);
 
@@ -178,7 +178,7 @@ impl<'a> WgpuRenderer<'a> {
     }
 }
 
-impl<'a> WgpuRendererInterface for WgpuRenderer<'a> {
+impl WgpuRendererInterface for WgpuRenderer<'_> {
     fn device(&mut self) -> &mut wgpu::Device {
         &mut self.device
     }

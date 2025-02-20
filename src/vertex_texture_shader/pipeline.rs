@@ -66,8 +66,8 @@ impl Pipeline {
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
                 bind_group_layouts: &[
-                    &camera_bind_group_layout.get(),
-                    &texture_bind_group_layout.get(),
+                    camera_bind_group_layout.get(),
+                    texture_bind_group_layout.get(),
                 ],
                 push_constant_ranges: &[],
             });
@@ -110,7 +110,7 @@ impl Pipeline {
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: DepthTexture::DEPTH_FORMAT,
                 depth_write_enabled: true,
-                depth_compare: depth_compare,
+                depth_compare,
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),
