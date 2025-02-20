@@ -82,9 +82,10 @@ impl WgpuRenderer<'_> {
                         defaults.max_color_attachment_bytes_per_sample = 64;
                         defaults
                     } else {
-                        let mut defaults = wgpu::Limits::default();
-                        defaults.max_color_attachment_bytes_per_sample = 64;
-                        defaults
+                        wgpu::Limits {
+                            max_color_attachment_bytes_per_sample: 64,
+                            ..Default::default()
+                        }
                     },
                     label: None,
                     memory_hints: wgpu::MemoryHints::default(),
