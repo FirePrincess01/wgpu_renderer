@@ -80,10 +80,12 @@ impl WgpuRenderer<'_> {
                         let mut defaults = wgpu::Limits::downlevel_webgl2_defaults();
                         defaults.max_texture_dimension_2d = 4096;
                         defaults.max_color_attachment_bytes_per_sample = 64;
+                        defaults.max_buffer_size = 1024 << 20; // (1 GiB)
                         defaults
                     } else {
                         wgpu::Limits {
                             max_color_attachment_bytes_per_sample: 64,
+                            max_buffer_size: 1024 << 20, // (1 GiB)
                             ..Default::default()
                         }
                     },
