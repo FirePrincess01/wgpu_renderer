@@ -14,7 +14,7 @@ use super::VertexBuffer;
 pub struct Mesh {
     vertex_buffer: VertexBuffer,
     color_buffer: ColorBuffer,
-    index_buffer: IndexBuffer,
+    index_buffer: IndexBuffer<u32>,
     instance_buffer: InstanceBuffer,
 }
 

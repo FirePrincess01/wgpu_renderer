@@ -3,13 +3,20 @@
 
 use wgpu::util::DeviceExt;
 
-pub struct IndexBuffer {
+pub struct IndexBuffer<T>
+where
+    T: bytemuck::Pod,
+{
     buffer: wgpu::Buffer,
     size: u32,
+    phantom: std::marker::PhantomData<T>,
 }
 
-impl IndexBuffer {
-    pub fn new(device: &wgpu::Device, indices: &[u32]) -> Self {
+impl<T> IndexBuffer<T>
+where
+    T: bytemuck::Pod,
+{
+    pub fn new(device: &wgpu::Device, indices: &[T]) -> Self {
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index Buffer"),
             contents: bytemuck::cast_slice(indices),
@@ -18,7 +25,11 @@ impl IndexBuffer {
 
         let size = indices.len() as u32;
 
-        Self { buffer, size }
+        Self {
+            buffer,
+            size,
+            phantom: std::marker::PhantomData,
+        }
     }
 
     // pub fn update(&mut self, queue: &mut wgpu::Queue, indices: &[u32])
@@ -30,11 +41,20 @@ impl IndexBuffer {
     //     }
     // }
 
-    pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
-        render_pass.set_index_buffer(self.buffer.slice(..), wgpu::IndexFormat::Uint32);
-    }
-
     pub fn size(&self) -> u32 {
         self.size
     }
 }
+
+impl IndexBuffer<u32> {
+    pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
+        render_pass.set_index_buffer(self.buffer.slice(..), wgpu::IndexFormat::Uint32);
+    }
+}
+
+impl IndexBuffer<u16> {
+    pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
+        render_pass.set_index_buffer(self.buffer.slice(..), wgpu::IndexFormat::Uint16);
+    }
+}
+

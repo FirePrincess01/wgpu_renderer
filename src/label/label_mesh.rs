@@ -9,7 +9,7 @@ use super::super::vertex_texture_shader::{
 
 pub struct LabelMesh {
     vertex_buffer: VertexBuffer,
-    index_buffer: IndexBuffer,
+    index_buffer: IndexBuffer<u32>,
     texture: Texture,
     instance_buffer: InstanceBuffer,
 }
