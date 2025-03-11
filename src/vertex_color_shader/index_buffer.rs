@@ -57,4 +57,3 @@ impl IndexBuffer<u16> {
         render_pass.set_index_buffer(self.buffer.slice(..), wgpu::IndexFormat::Uint16);
     }
 }
-
