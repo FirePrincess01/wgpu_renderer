@@ -2,7 +2,7 @@
 
 use crate::vertex_texture_shader::VertexTextureShaderDraw;
 
-use super::super::renderer::WgpuRendererInterface;
+use super::super::wgpu_renderer::WgpuRendererInterface;
 use super::super::vertex_texture_shader::{
     IndexBuffer, Instance, InstanceBuffer, Texture, TextureBindGroupLayout, Vertex, VertexBuffer,
 };

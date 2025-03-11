@@ -5,7 +5,7 @@ pub mod freefont;
 pub mod gui;
 pub mod label;
 pub mod performance_monitor;
-pub mod renderer;
+pub mod wgpu_renderer;
 pub mod vertex_color_shader;
 pub mod vertex_heightmap_shader;
 pub mod vertex_texture_shader;

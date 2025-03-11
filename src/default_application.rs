@@ -5,7 +5,7 @@ use std::sync::Arc;
 use pollster::FutureExt;
 use winit::window;
 
-use crate::renderer::{WgpuRenderer, WgpuRendererInterface};
+use crate::wgpu_renderer::{WgpuRenderer, WgpuRendererInterface};
 
 pub trait DefaultApplicationInterface {
     fn create(
