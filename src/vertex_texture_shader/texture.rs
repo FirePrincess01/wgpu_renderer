@@ -1,7 +1,7 @@
 //! The Texture used in the shader
 //!
 
-use super::super::renderer;
+use super::super::wgpu_renderer;
 use super::texture_bind_group_layout::TextureBindGroupLayout;
 use anyhow::*;
 use image::Rgba;
@@ -16,7 +16,7 @@ pub struct Texture {
 
 impl Texture {
     pub fn new(
-        wgpu_renderer: &mut dyn renderer::WgpuRendererInterface,
+        wgpu_renderer: &mut dyn wgpu_renderer::WgpuRendererInterface,
         texture_bind_group_layout: &TextureBindGroupLayout,
         rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
         label: Option<&str>,
@@ -25,7 +25,7 @@ impl Texture {
     }
 
     pub fn new_with_mipmaps(
-        wgpu_renderer: &mut dyn renderer::WgpuRendererInterface,
+        wgpu_renderer: &mut dyn wgpu_renderer::WgpuRendererInterface,
         texture_bind_group_layout: &TextureBindGroupLayout,
         rgba: &image::ImageBuffer<image::Rgba<u8>, Vec<u8>>,
         label: Option<&str>,

@@ -4,7 +4,7 @@
 //! The implementation uses wgpu for rendering
 //!
 
-use super::super::renderer::depth_texture;
+use super::super::wgpu_renderer::depth_texture;
 use super::camera_bind_group_layout;
 use super::color;
 use super::instance;

@@ -1,7 +1,7 @@
 //! The CameraUniform struct used in the shader
 //!
 
-use super::super::renderer;
+use super::super::wgpu_renderer;
 use cgmath::prelude::*;
 
 #[repr(C)]
@@ -35,8 +35,8 @@ impl CameraUniform {
 
     pub fn update_view_proj(
         &mut self,
-        camera: &renderer::camera::Camera,
-        projection: &renderer::camera::Projection,
+        camera: &wgpu_renderer::camera::Camera,
+        projection: &wgpu_renderer::camera::Projection,
     ) {
         self.view_position = camera.position.to_homogeneous().into();
         self.view_proj = (projection.calc_matrix() * camera.calc_matrix()).into();

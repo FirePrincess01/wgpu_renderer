@@ -18,7 +18,7 @@ pub struct Mesh {
     vertex_buffer: VertexBuffer,
     texture_index: usize,
     heightmap_texture: HeightmapTexture,
-    index_buffer: IndexBuffer,
+    index_buffer: IndexBuffer<u32>,
     instance_buffer: InstanceBuffer,
 }
 

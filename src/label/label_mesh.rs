@@ -2,14 +2,14 @@
 
 use crate::vertex_texture_shader::VertexTextureShaderDraw;
 
-use super::super::renderer::WgpuRendererInterface;
 use super::super::vertex_texture_shader::{
     IndexBuffer, Instance, InstanceBuffer, Texture, TextureBindGroupLayout, Vertex, VertexBuffer,
 };
+use super::super::wgpu_renderer::WgpuRendererInterface;
 
 pub struct LabelMesh {
     vertex_buffer: VertexBuffer,
-    index_buffer: IndexBuffer,
+    index_buffer: IndexBuffer<u32>,
     texture: Texture,
     instance_buffer: InstanceBuffer,
 }

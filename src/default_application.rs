@@ -5,7 +5,7 @@ use std::sync::Arc;
 use pollster::FutureExt;
 use winit::window;
 
-use crate::renderer::{WgpuRenderer, WgpuRendererInterface};
+use crate::wgpu_renderer::{WgpuRenderer, WgpuRendererInterface};
 
 pub trait DefaultApplicationInterface {
     fn create(
@@ -111,7 +111,7 @@ impl<ConcreteApplication: DefaultApplicationInterface> winit::application::Appli
         }
 
         let mut wgpu_renderer =
-            WgpuRenderer::new(window.clone(), Some(wgpu::PresentMode::Fifo)).block_on();
+            WgpuRenderer::new(window.clone(), Some(wgpu::PresentMode::Immediate)).block_on();
         let size = window.inner_size();
         let scale_factor = window.scale_factor();
         let app = ConcreteApplication::create(&mut wgpu_renderer, size, scale_factor as f32);

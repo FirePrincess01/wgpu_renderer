@@ -1,7 +1,7 @@
 //! A general purpose pipeline using vertices, textures and instances
 //!
 
-use super::super::renderer::depth_texture::DepthTexture;
+use super::super::wgpu_renderer::depth_texture::DepthTexture;
 use super::CameraBindGroupLayout;
 use super::InstanceRaw;
 use super::TextureBindGroupLayout;
