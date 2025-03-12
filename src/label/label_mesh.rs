@@ -1,5 +1,6 @@
 //! Creates a texture with a text label
 
+use crate::vertex_color_shader::InstanceRaw;
 use crate::vertex_texture_shader::VertexTextureShaderDraw;
 
 use super::super::vertex_texture_shader::{
@@ -11,7 +12,7 @@ pub struct LabelMesh {
     vertex_buffer: VertexBuffer,
     index_buffer: IndexBuffer<u32>,
     texture: Texture,
-    instance_buffer: InstanceBuffer,
+    instance_buffer: InstanceBuffer<InstanceRaw>,
 }
 
 impl LabelMesh {
