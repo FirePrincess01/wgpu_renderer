@@ -3,6 +3,7 @@
 
 use super::Color;
 use super::Instance;
+use super::InstanceRaw;
 use super::Vertex;
 
 use super::ColorBuffer;
@@ -15,7 +16,7 @@ pub struct Mesh {
     vertex_buffer: VertexBuffer,
     color_buffer: ColorBuffer,
     index_buffer: IndexBuffer<u32>,
-    instance_buffer: InstanceBuffer,
+    instance_buffer: InstanceBuffer<InstanceRaw>,
 }
 
 #[allow(dead_code)]
@@ -59,7 +60,7 @@ impl Mesh {
         self.vertex_buffer.bind(render_pass);
         self.color_buffer.bind(render_pass);
         self.index_buffer.bind(render_pass);
-        self.instance_buffer.bind(render_pass);
+        self.instance_buffer.bind_slot(render_pass, 2);
 
         render_pass.draw_indexed(
             0..self.index_buffer.size(),

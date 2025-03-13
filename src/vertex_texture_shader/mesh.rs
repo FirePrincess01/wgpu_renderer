@@ -2,6 +2,7 @@
 //!
 
 use super::Instance;
+use super::InstanceRaw;
 use super::Texture;
 use super::Vertex;
 
@@ -15,7 +16,7 @@ pub struct Mesh {
     vertex_buffer: VertexBuffer,
     texture_index: usize,
     index_buffer: IndexBuffer<u32>,
-    instance_buffer: InstanceBuffer,
+    instance_buffer: InstanceBuffer<InstanceRaw>,
 }
 
 #[allow(dead_code)]

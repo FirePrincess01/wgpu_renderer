@@ -5,6 +5,7 @@ use super::Heightmap;
 use super::Heightmap2D;
 use super::HeightmapBindGroupLayout;
 use super::Instance;
+use super::InstanceRaw;
 use super::Vertex;
 
 use super::HeightmapTexture;
@@ -19,7 +20,7 @@ pub struct Mesh {
     texture_index: usize,
     heightmap_texture: HeightmapTexture,
     index_buffer: IndexBuffer<u32>,
-    instance_buffer: InstanceBuffer,
+    instance_buffer: InstanceBuffer<InstanceRaw>,
 }
 
 impl Mesh {

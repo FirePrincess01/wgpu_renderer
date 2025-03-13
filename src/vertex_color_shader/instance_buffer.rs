@@ -1,28 +1,35 @@
 //! GPU memory buffer containing the instances for this shader
 //!
 
-use super::InstanceRaw;
 use wgpu::util::DeviceExt;
 
-pub struct InstanceBuffer {
+pub struct InstanceBuffer<TInstance> {
     buffer: wgpu::Buffer,
-    size: u32,
+    _size: u32,
+    phantom: std::marker::PhantomData<TInstance>,
 }
 
-impl InstanceBuffer {
-    pub fn new(device: &wgpu::Device, instances: &[InstanceRaw]) -> Self {
+impl<TInstance> InstanceBuffer<TInstance>
+where
+    TInstance: bytemuck::Pod,
+{
+    pub fn new(device: &wgpu::Device, instances: &[TInstance]) -> Self {
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Instance Buffer"),
             contents: bytemuck::cast_slice(instances),
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
-        let size = instances.len() as u32;
+        let _size = instances.len() as u32;
 
-        Self { buffer, size }
+        Self {
+            buffer,
+            _size,
+            phantom: std::marker::PhantomData,
+        }
     }
 
-    pub fn update(&mut self, queue: &wgpu::Queue, instances: &[InstanceRaw]) {
+    pub fn update(&mut self, queue: &wgpu::Queue, instances: &[TInstance]) {
         let data = bytemuck::cast_slice(instances);
 
         if data.len() as u64 <= self.buffer.size() {
@@ -31,7 +38,7 @@ impl InstanceBuffer {
     }
 
     pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
-        render_pass.set_vertex_buffer(2, self.buffer.slice(..));
+        render_pass.set_vertex_buffer(1, self.buffer.slice(..));
     }
 
     pub fn bind_slot<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, slot: u32) {
@@ -39,6 +46,6 @@ impl InstanceBuffer {
     }
 
     pub fn size(&self) -> u32 {
-        self.size
+        self._size
     }
 }
