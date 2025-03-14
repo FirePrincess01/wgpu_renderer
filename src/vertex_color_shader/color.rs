@@ -8,7 +8,7 @@ pub struct Color {
 }
 
 impl Color {
-    pub fn _black() -> Self {
+    pub fn black() -> Self {
         Self {
             color: [0.0, 0.0, 0.0],
         }

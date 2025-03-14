@@ -3,9 +3,11 @@
 
 use super::super::wgpu_renderer::depth_texture::DepthTexture;
 use super::CameraBindGroupLayout;
+use super::CameraUniformBuffer;
 use super::InstanceRaw;
 use super::TextureBindGroupLayout;
 use super::Vertex;
+use super::VertexTextureShaderDraw;
 
 /// A general purpose shader using vertices, colors and an instance matrix
 #[allow(dead_code)]
@@ -128,5 +130,16 @@ impl Pipeline {
 
     pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
         render_pass.set_pipeline(&self.render_pipeline);
+    }
+
+    pub fn draw<'a>(
+        &self,
+        render_pass: &mut wgpu::RenderPass<'a>,
+        camera: &'a CameraUniformBuffer,
+        mesh: &'a dyn VertexTextureShaderDraw,
+    ) {
+        render_pass.set_pipeline(&self.render_pipeline);
+        camera.bind(render_pass);
+        mesh.draw(render_pass);
     }
 }

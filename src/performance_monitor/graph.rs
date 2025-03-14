@@ -23,8 +23,10 @@ impl Graph {
     const OFFSET_X: usize = 10;
     const OFFSET_Y: usize = 10;
 
-    const NR_LINES: usize = 700 - (Self::OFFSET_X + Self::OFFSET_Y);
-    const LINE_LENGTH: usize = 200;
+    const WIDTH: usize = 700;
+    const HEIGHT: usize = 210;
+    const NR_LINES: usize = Self::WIDTH - (Self::OFFSET_X);
+    const LINE_LENGTH: usize = Self::HEIGHT - Self::OFFSET_Y;
 
     const FPS_LINES: &'static [Vertex] = &[
         Vertex {
@@ -69,8 +71,22 @@ impl Graph {
                 0.0,
             ],
         },
-        // Vertex { position: [Self::OFFSET_X as f32,                         Self::OFFSET_Y as f32 + Self::LEN_PER_MICRO * Self::DURATION_30FPS.as_micros() as f32, 0.0] },
-        // Vertex { position: [Self::OFFSET_X as f32 + Self::NR_LINES as f32, Self::OFFSET_Y as f32 + Self::LEN_PER_MICRO * Self::DURATION_30FPS.as_micros() as f32, 0.0] },
+        // Vertex {
+        //     position: [
+        //         Self::OFFSET_X as f32,
+        //         Self::OFFSET_Y as f32
+        //             + Self::LEN_PER_MICRO * Self::DURATION_30FPS.as_micros() as f32,
+        //         0.0,
+        //     ],
+        // },
+        // Vertex {
+        //     position: [
+        //         Self::OFFSET_X as f32 + Self::NR_LINES as f32,
+        //         Self::OFFSET_Y as f32
+        //             + Self::LEN_PER_MICRO * Self::DURATION_30FPS.as_micros() as f32,
+        //         0.0,
+        //     ],
+        // },
     ];
 
     pub fn new(watch_points_size: usize) -> Self {
@@ -79,7 +95,7 @@ impl Graph {
         let mut vertices =
             vec![Vertex::zero(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
         let mut colors =
-            vec![Color::_black(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
+            vec![Color::white(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
         let mut indices = vec![0_u32; line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
 
         // vertices
@@ -177,6 +193,32 @@ impl Graph {
         for i in 0..line.len() {
             vertices[i].position[1] = line[i] + Self::OFFSET_Y as f32;
         }
+    }
+
+    pub fn get_height(&self) -> usize {
+        Self::HEIGHT
+    }
+
+    pub fn get_height_30fps(&self) -> f32 {
+        if Self::FPS_LINES.len() >= 8 {
+            Self::FPS_LINES[6].position[1]
+        }
+        else {
+            0.0
+        }
+    }
+
+    pub fn get_height_60fps(&self) -> f32 {
+        Self::FPS_LINES[4].position[1]
+    }
+
+    pub fn get_height_120fps(&self) -> f32 {
+        Self::FPS_LINES[2].position[1]
+
+    }
+
+    pub fn get_width(&self) -> usize {
+        Self::WIDTH
     }
 }
 
