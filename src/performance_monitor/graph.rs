@@ -10,7 +10,7 @@ pub struct Graph {
     pub colors: Vec<Color>,
     pub indices: Vec<u32>,
 
-    watchpoints_size: usize,
+    watch_points_size: usize,
 }
 
 impl Graph {
@@ -73,8 +73,8 @@ impl Graph {
         // Vertex { position: [Self::OFFSET_X as f32 + Self::NR_LINES as f32, Self::OFFSET_Y as f32 + Self::LEN_PER_MICRO * Self::DURATION_30FPS.as_micros() as f32, 0.0] },
     ];
 
-    pub fn new(watchpoints_size: usize) -> Self {
-        let line_nr_vertices = watchpoints_size * 2 + 2;
+    pub fn new(watch_points_size: usize) -> Self {
+        let line_nr_vertices = watch_points_size * 2 + 2;
 
         let mut vertices =
             vec![Vertex::zero(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
@@ -119,30 +119,29 @@ impl Graph {
             colors,
             indices,
 
-            watchpoints_size,
+            watch_points_size,
         }
     }
 
     fn create_line(
         last_update_time: instant::Instant,
         update_time: instant::Instant,
-        watchpoints: &[watch::Watchpoint],
+        watch_points: &[watch::WatchPoint],
     ) -> Vec<f32> {
-        let len = watchpoints.len() * 2 + 2;
+        let len = watch_points.len() * 2 + 2;
         let mut line: Vec<f32> = vec![0.0; len];
 
-        // for i in 0..watchpoints.len() {
-        for (i, watchpoint) in watchpoints.iter().enumerate() {
+        for (i, watch_point) in watch_points.iter().enumerate() {
             let j = i * 2;
 
-            let micros_start = if watchpoint.start > last_update_time {
-                (watchpoint.start - last_update_time).as_micros() as f32 * Self::LEN_PER_MICRO
+            let micros_start = if watch_point.start > last_update_time {
+                (watch_point.start - last_update_time).as_micros() as f32 * Self::LEN_PER_MICRO
             } else {
                 0.0
             };
 
-            let micros_stop = if watchpoint.start > last_update_time {
-                (watchpoint.stop - last_update_time).as_micros() as f32 * Self::LEN_PER_MICRO
+            let micros_stop = if watch_point.start > last_update_time {
+                (watch_point.stop - last_update_time).as_micros() as f32 * Self::LEN_PER_MICRO
             } else {
                 0.0
             };
@@ -186,13 +185,13 @@ impl watch::Viewer for Graph {
         &mut self,
         last_update_time: instant::Instant,
         update_time: instant::Instant,
-        watchpoints: &[watch::Watchpoint],
+        watch_points: &[watch::WatchPoint],
     ) {
-        if watchpoints.len() != self.watchpoints_size {
+        if watch_points.len() != self.watch_points_size {
             return;
         }
 
-        let line = Self::create_line(last_update_time, update_time, watchpoints);
+        let line = Self::create_line(last_update_time, update_time, watch_points);
         Self::update_vertices(&mut self.vertices[Self::FPS_LINES.len()..], &line);
     }
 }
