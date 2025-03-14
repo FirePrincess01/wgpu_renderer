@@ -89,6 +89,23 @@ impl Graph {
         // },
     ];
 
+    pub fn color_gradient(watch_points_size: usize) -> Vec<cgmath::Vector3<f32>> {
+        let gradient = colorous::RAINBOW;
+
+        let mut colors = Vec::with_capacity(watch_points_size); 
+
+        for i in 0..(watch_points_size) {
+            let color = gradient.eval_rational(i, watch_points_size);
+            colors.push(cgmath::Vector3{
+                x: color.r as f32 / 255.0,
+                y: color.g as f32 / 255.0,
+                z: color.b as f32 / 255.0,
+            });
+        }
+
+        colors
+    }
+    
     pub fn new(watch_points_size: usize) -> Self {
         let line_nr_vertices = watch_points_size * 2 + 2;
 
@@ -102,19 +119,14 @@ impl Graph {
         vertices[..Self::FPS_LINES.len()].copy_from_slice(Self::FPS_LINES);
 
         // colors
-        let gradient = colorous::RAINBOW;
+        let color_gradient = Self::color_gradient(watch_points_size);
 
         for i in 0..colors.len() / line_nr_vertices {
-            for j in 0..line_nr_vertices / 2 {
-                let color = gradient.eval_rational(j, line_nr_vertices / 2);
+            for j in 0..watch_points_size {
+                let color = color_gradient[j];
 
-                let r = color.r as f32 / 255.0;
-                let g = color.g as f32 / 255.0;
-                let b = color.b as f32 / 255.0;
-
-                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2].color = [r, g, b];
-
-                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2 + 1].color = [r, g, b];
+                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2].color = color.into();
+                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2 + 1].color = color.into();
             }
 
             // last two points are gray (show the combined fps)
@@ -219,6 +231,10 @@ impl Graph {
 
     pub fn get_width(&self) -> usize {
         Self::WIDTH
+    }
+
+    pub fn get_nr_lines(&self) -> usize {
+        Self::NR_LINES
     }
 }
 

@@ -4,7 +4,7 @@
 mod fps;
 mod graph;
 mod orthographic_uniform;
-mod watch;
+pub mod watch;
 
 pub use fps::Fps;
 pub use graph::Graph;

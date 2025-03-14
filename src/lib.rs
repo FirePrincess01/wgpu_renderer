@@ -9,3 +9,4 @@ pub mod vertex_color_shader;
 pub mod vertex_heightmap_shader;
 pub mod vertex_texture_shader;
 pub mod wgpu_renderer;
+pub mod shape;
