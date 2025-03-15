@@ -1,6 +1,6 @@
 //! A general purpose pipeline using vertices, colors and instances
 //!
-//! Vertices and Colors are independently updateable
+//! Vertices and Colors are independently updatable
 //! The implementation uses wgpu for rendering
 //!
 
