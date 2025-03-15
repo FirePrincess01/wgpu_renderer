@@ -1,18 +1,6 @@
-//! Stores the times of various watchpoints
+//! Stores the times of various watch points
 //!
 
-#[derive(Copy, Clone)]
-pub struct WatchPoint {
-    pub start: instant::Instant,
-    pub stop: instant::Instant,
-    pub name: &'static str,
-}
-
-impl WatchPoint {
-    fn new(t: instant::Instant) -> Self {
-        Self { start: t, stop: t, name: "" }
-    }
-}
 
 pub struct Watch<const SIZE: usize> {
     last_update_time: instant::Instant,
@@ -20,14 +8,6 @@ pub struct Watch<const SIZE: usize> {
     watch_points: [WatchPoint; SIZE],
 }
 
-pub trait Viewer {
-    fn update(
-        &mut self,
-        last_update_time: instant::Instant,
-        update_time: instant::Instant,
-        watch_points: &[WatchPoint],
-    );
-}
 
 impl<const SIZE: usize> Default for Watch<SIZE> {
     fn default() -> Self {
@@ -82,8 +62,36 @@ impl<const SIZE: usize> Watch<SIZE> {
         }
     }
 
-    pub fn update_viewer(&mut self, viewer: &mut impl Viewer) {
+    pub fn get_viewer_data(&mut self) -> WatchViewerData<SIZE> {
         self.validate();
-        viewer.update(self.last_update_time, self.update_time, &self.watch_points);
+        WatchViewerData {
+            last_update_time: self.last_update_time,
+            update_time: self.update_time,
+            watch_points: self.watch_points,
+        }
     }
+}
+
+#[derive(Copy, Clone)]
+pub struct WatchPoint {
+    pub start: instant::Instant,
+    pub stop: instant::Instant,
+    pub name: &'static str,
+}
+
+impl WatchPoint {
+    fn new(t: instant::Instant) -> Self {
+        Self {
+            start: t,
+            stop: t,
+            name: "",
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct WatchViewerData<const SIZE: usize> {
+    pub last_update_time: instant::Instant,
+    pub update_time: instant::Instant,
+    pub watch_points: [WatchPoint; SIZE],
 }
