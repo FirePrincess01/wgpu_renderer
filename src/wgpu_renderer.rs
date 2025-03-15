@@ -17,6 +17,7 @@ pub trait WgpuRendererInterface {
     fn surface_format(&self) -> wgpu::TextureFormat;
     fn get_depth_texture_view(&self) -> &wgpu::TextureView;
     fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError>;
+    fn enable_vsync(&mut self, is_vsync_enabled: bool);
 }
 
 pub struct WgpuRenderer<'a> {
@@ -208,5 +209,15 @@ impl WgpuRendererInterface for WgpuRenderer<'_> {
 
     fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError> {
         self.surface.get_current_texture()
+    }
+
+    fn enable_vsync(&mut self, is_vsync_enabled: bool) {
+        if is_vsync_enabled {
+            self.config.present_mode = wgpu::PresentMode::AutoVsync;
+        } else {
+            self.config.present_mode = wgpu::PresentMode::AutoNoVsync;
+        }
+
+        self.surface.configure(&self.device, &self.config);
     }
 }

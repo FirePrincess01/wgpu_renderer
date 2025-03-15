@@ -1,6 +1,6 @@
 //! A general purpose pipeline using vertices, colors and instances
 //!
-//! Vertices and Colors are independently updateable
+//! Vertices and Colors are independently updatable
 //! The implementation uses wgpu for rendering
 //!
 
@@ -9,6 +9,9 @@ use super::camera_bind_group_layout;
 use super::color;
 use super::instance;
 use super::vertex;
+use super::vertex_color_shader_draw::VertexColorShaderDrawLines;
+use super::CameraUniformBuffer;
+use super::VertexColorShaderDraw;
 
 /// A general purpose shader using vertices, colors and an instance matrix
 #[allow(dead_code)]
@@ -119,5 +122,27 @@ impl Pipeline {
 
     pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
         render_pass.set_pipeline(&self.render_pipeline);
+    }
+
+    pub fn draw<'a>(
+        &self,
+        render_pass: &mut wgpu::RenderPass<'a>,
+        camera: &'a CameraUniformBuffer,
+        mesh: &'a dyn VertexColorShaderDraw,
+    ) {
+        render_pass.set_pipeline(&self.render_pipeline);
+        camera.bind(render_pass);
+        mesh.draw(render_pass);
+    }
+
+    pub fn draw_lines<'a>(
+        &self,
+        render_pass: &mut wgpu::RenderPass<'a>,
+        camera: &'a CameraUniformBuffer,
+        mesh: &'a dyn VertexColorShaderDrawLines,
+    ) {
+        render_pass.set_pipeline(&self.render_pipeline);
+        camera.bind(render_pass);
+        mesh.draw_lines(render_pass);
     }
 }

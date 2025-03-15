@@ -5,15 +5,16 @@ use super::super::vertex_color_shader::Color;
 use super::super::vertex_color_shader::Vertex;
 use super::watch;
 
-pub struct Graph {
+pub struct Graph<const SIZE: usize> {
     pub vertices: Vec<Vertex>,
     pub colors: Vec<Color>,
     pub indices: Vec<u32>,
 
-    watchpoints_size: usize,
+    watch_points_size: usize,
+    color_gradient: colorous::Gradient,
 }
 
-impl Graph {
+impl<const SIZE: usize> Graph<SIZE> {
     const DURATION_120FPS: instant::Duration = std::time::Duration::from_micros(8333); // 120 fps
     const DURATION_60FPS: instant::Duration = std::time::Duration::from_micros(16666); // 60 fps
     const DURATION_30FPS: instant::Duration = std::time::Duration::from_micros(33333); // 30 fps
@@ -23,8 +24,10 @@ impl Graph {
     const OFFSET_X: usize = 10;
     const OFFSET_Y: usize = 10;
 
-    const NR_LINES: usize = 700 - (Self::OFFSET_X + Self::OFFSET_Y);
-    const LINE_LENGTH: usize = 200;
+    const WIDTH: usize = 700;
+    const HEIGHT: usize = 210;
+    const NR_LINES: usize = Self::WIDTH - (Self::OFFSET_X);
+    const LINE_LENGTH: usize = Self::HEIGHT - Self::OFFSET_Y;
 
     const FPS_LINES: &'static [Vertex] = &[
         Vertex {
@@ -69,36 +72,71 @@ impl Graph {
                 0.0,
             ],
         },
-        // Vertex { position: [Self::OFFSET_X as f32,                         Self::OFFSET_Y as f32 + Self::LEN_PER_MICRO * Self::DURATION_30FPS.as_micros() as f32, 0.0] },
-        // Vertex { position: [Self::OFFSET_X as f32 + Self::NR_LINES as f32, Self::OFFSET_Y as f32 + Self::LEN_PER_MICRO * Self::DURATION_30FPS.as_micros() as f32, 0.0] },
+        // Vertex {
+        //     position: [
+        //         Self::OFFSET_X as f32,
+        //         Self::OFFSET_Y as f32
+        //             + Self::LEN_PER_MICRO * Self::DURATION_30FPS.as_micros() as f32,
+        //         0.0,
+        //     ],
+        // },
+        // Vertex {
+        //     position: [
+        //         Self::OFFSET_X as f32 + Self::NR_LINES as f32,
+        //         Self::OFFSET_Y as f32
+        //             + Self::LEN_PER_MICRO * Self::DURATION_30FPS.as_micros() as f32,
+        //         0.0,
+        //     ],
+        // },
     ];
 
-    pub fn new(watchpoints_size: usize) -> Self {
-        let line_nr_vertices = watchpoints_size * 2 + 2;
+    pub fn color_gradient_vec(
+        color_gradient: &colorous::Gradient,
+        watch_points_size: usize,
+    ) -> Vec<cgmath::Vector3<f32>> {
+        let gradient = color_gradient;
+
+        let mut colors = Vec::with_capacity(watch_points_size);
+
+        for i in 0..(watch_points_size) {
+            let color = gradient.eval_rational(i, watch_points_size);
+            colors.push(cgmath::Vector3 {
+                x: color.r as f32 / 255.0,
+                y: color.g as f32 / 255.0,
+                z: color.b as f32 / 255.0,
+            });
+        }
+
+        colors
+    }
+
+    pub fn color_gradient(&self) -> Vec<cgmath::Vector3<f32>> {
+        Self::color_gradient_vec(&self.color_gradient, self.watch_points_size)
+    }
+
+    pub fn new(color_gradient: colorous::Gradient) -> Self {
+        let watch_points_size = SIZE;
+        let line_nr_vertices = watch_points_size * 2 + 2;
 
         let mut vertices =
             vec![Vertex::zero(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
         let mut colors =
-            vec![Color::_black(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
+            vec![Color::white(); line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
         let mut indices = vec![0_u32; line_nr_vertices * Self::NR_LINES + Self::FPS_LINES.len()];
 
         // vertices
         vertices[..Self::FPS_LINES.len()].copy_from_slice(Self::FPS_LINES);
 
         // colors
-        let gradient = colorous::RAINBOW;
+        let color_gradient_vec = Self::color_gradient_vec(&color_gradient, watch_points_size);
 
         for i in 0..colors.len() / line_nr_vertices {
-            for j in 0..line_nr_vertices / 2 {
-                let color = gradient.eval_rational(j, line_nr_vertices / 2);
+            for j in 0..watch_points_size {
+                let color = color_gradient_vec[j];
 
-                let r = color.r as f32 / 255.0;
-                let g = color.g as f32 / 255.0;
-                let b = color.b as f32 / 255.0;
-
-                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2].color = [r, g, b];
-
-                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2 + 1].color = [r, g, b];
+                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2].color = color.into();
+                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2 + 1].color =
+                    color.into();
             }
 
             // last two points are gray (show the combined fps)
@@ -119,30 +157,30 @@ impl Graph {
             colors,
             indices,
 
-            watchpoints_size,
+            watch_points_size,
+            color_gradient,
         }
     }
 
     fn create_line(
         last_update_time: instant::Instant,
         update_time: instant::Instant,
-        watchpoints: &[watch::Watchpoint],
+        watch_points: &[watch::WatchPoint],
     ) -> Vec<f32> {
-        let len = watchpoints.len() * 2 + 2;
+        let len = watch_points.len() * 2 + 2;
         let mut line: Vec<f32> = vec![0.0; len];
 
-        // for i in 0..watchpoints.len() {
-        for (i, watchpoint) in watchpoints.iter().enumerate() {
+        for (i, watch_point) in watch_points.iter().enumerate() {
             let j = i * 2;
 
-            let micros_start = if watchpoint.start > last_update_time {
-                (watchpoint.start - last_update_time).as_micros() as f32 * Self::LEN_PER_MICRO
+            let micros_start = if watch_point.start > last_update_time {
+                (watch_point.start - last_update_time).as_micros() as f32 * Self::LEN_PER_MICRO
             } else {
                 0.0
             };
 
-            let micros_stop = if watchpoint.start > last_update_time {
-                (watchpoint.stop - last_update_time).as_micros() as f32 * Self::LEN_PER_MICRO
+            let micros_stop = if watch_point.start > last_update_time {
+                (watch_point.stop - last_update_time).as_micros() as f32 * Self::LEN_PER_MICRO
             } else {
                 0.0
             };
@@ -179,20 +217,45 @@ impl Graph {
             vertices[i].position[1] = line[i] + Self::OFFSET_Y as f32;
         }
     }
-}
 
-impl watch::Viewer for Graph {
-    fn update(
-        &mut self,
-        last_update_time: instant::Instant,
-        update_time: instant::Instant,
-        watchpoints: &[watch::Watchpoint],
-    ) {
-        if watchpoints.len() != self.watchpoints_size {
+    pub fn get_height(&self) -> usize {
+        Self::HEIGHT
+    }
+
+    pub fn get_height_30fps(&self) -> f32 {
+        if Self::FPS_LINES.len() >= 8 {
+            Self::FPS_LINES[6].position[1]
+        } else {
+            0.0
+        }
+    }
+
+    pub fn get_height_60fps(&self) -> f32 {
+        Self::FPS_LINES[4].position[1]
+    }
+
+    pub fn get_height_120fps(&self) -> f32 {
+        Self::FPS_LINES[2].position[1]
+    }
+
+    pub fn get_width(&self) -> usize {
+        Self::WIDTH
+    }
+
+    pub fn get_nr_lines(&self) -> usize {
+        Self::NR_LINES
+    }
+
+    pub fn update_from_viewer_data(&mut self, data: &watch::WatchViewerData<SIZE>) {
+        let last_update_time = data.last_update_time;
+        let update_time = data.update_time;
+        let watch_points = &data.watch_points;
+
+        if watch_points.len() != self.watch_points_size {
             return;
         }
 
-        let line = Self::create_line(last_update_time, update_time, watchpoints);
+        let line = Self::create_line(last_update_time, update_time, watch_points);
         Self::update_vertices(&mut self.vertices[Self::FPS_LINES.len()..], &line);
     }
 }
