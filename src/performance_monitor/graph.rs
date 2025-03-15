@@ -11,7 +11,7 @@ pub struct Graph<const SIZE: usize> {
     pub indices: Vec<u32>,
 
     watch_points_size: usize,
-    color_gradient: colorous::Gradient
+    color_gradient: colorous::Gradient,
 }
 
 impl<const SIZE: usize> Graph<SIZE> {
@@ -90,14 +90,17 @@ impl<const SIZE: usize> Graph<SIZE> {
         // },
     ];
 
-    pub fn color_gradient_vec(color_gradient: &colorous::Gradient, watch_points_size: usize) -> Vec<cgmath::Vector3<f32>> {
+    pub fn color_gradient_vec(
+        color_gradient: &colorous::Gradient,
+        watch_points_size: usize,
+    ) -> Vec<cgmath::Vector3<f32>> {
         let gradient = color_gradient;
 
-        let mut colors = Vec::with_capacity(watch_points_size); 
+        let mut colors = Vec::with_capacity(watch_points_size);
 
         for i in 0..(watch_points_size) {
             let color = gradient.eval_rational(i, watch_points_size);
-            colors.push(cgmath::Vector3{
+            colors.push(cgmath::Vector3 {
                 x: color.r as f32 / 255.0,
                 y: color.g as f32 / 255.0,
                 z: color.b as f32 / 255.0,
@@ -110,7 +113,7 @@ impl<const SIZE: usize> Graph<SIZE> {
     pub fn color_gradient(&self) -> Vec<cgmath::Vector3<f32>> {
         Self::color_gradient_vec(&self.color_gradient, self.watch_points_size)
     }
-    
+
     pub fn new(color_gradient: colorous::Gradient) -> Self {
         let watch_points_size = SIZE;
         let line_nr_vertices = watch_points_size * 2 + 2;
@@ -132,7 +135,8 @@ impl<const SIZE: usize> Graph<SIZE> {
                 let color = color_gradient_vec[j];
 
                 colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2].color = color.into();
-                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2 + 1].color = color.into();
+                colors[Self::FPS_LINES.len() + i * line_nr_vertices + j * 2 + 1].color =
+                    color.into();
             }
 
             // last two points are gray (show the combined fps)
@@ -221,8 +225,7 @@ impl<const SIZE: usize> Graph<SIZE> {
     pub fn get_height_30fps(&self) -> f32 {
         if Self::FPS_LINES.len() >= 8 {
             Self::FPS_LINES[6].position[1]
-        }
-        else {
+        } else {
             0.0
         }
     }
@@ -233,7 +236,6 @@ impl<const SIZE: usize> Graph<SIZE> {
 
     pub fn get_height_120fps(&self) -> f32 {
         Self::FPS_LINES[2].position[1]
-
     }
 
     pub fn get_width(&self) -> usize {

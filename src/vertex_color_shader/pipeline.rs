@@ -146,5 +146,3 @@ impl Pipeline {
         mesh.draw_lines(render_pass);
     }
 }
-
-

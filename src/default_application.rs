@@ -84,7 +84,7 @@ impl<ConcreteApplication: DefaultApplicationInterface> winit::application::Appli
                 builder.init();
             }
         }
-        
+
         let window = event_loop
             .create_window(winit::window::Window::default_attributes())
             .unwrap();

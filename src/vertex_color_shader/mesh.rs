@@ -55,14 +55,14 @@ impl Mesh {
     ) -> Self {
         let mut vertices = Vec::new();
         for position in &shape.positions {
-            vertices.push(Vertex{
+            vertices.push(Vertex {
                 position: (*position).into(),
             });
         }
 
         let mut colors = Vec::new();
         for _i in 0..vertices.len() {
-            colors.push(Color{
+            colors.push(Color {
                 color: (*color).into(),
             });
         }

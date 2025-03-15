@@ -38,7 +38,7 @@ impl UVSphere {
             indices.push(i as u16);
         }
 
-        let mesh_data = MeshDataPoints{
+        let mesh_data = MeshDataPoints {
             positions,
             normals,
             indices,
@@ -53,11 +53,11 @@ impl UVSphere {
     }
 }
 
-impl MeshDataInterface for UVSphere {   
+impl MeshDataInterface for UVSphere {
     fn points(&self) -> &MeshDataPoints {
         &self.mesh_data
     }
-    
+
     fn triangles(&self) -> &MeshDataTriangles {
         &self.mesh_data_triangles
     }

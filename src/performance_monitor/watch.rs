@@ -1,13 +1,11 @@
 //! Stores the times of various watch points
 //!
 
-
 pub struct Watch<const SIZE: usize> {
     last_update_time: instant::Instant,
     update_time: instant::Instant,
     watch_points: [WatchPoint; SIZE],
 }
-
 
 impl<const SIZE: usize> Default for Watch<SIZE> {
     fn default() -> Self {

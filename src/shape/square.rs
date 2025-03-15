@@ -17,13 +17,13 @@ impl Square {
             cgmath::Vector3::new(0.0, a, 0.0),
             cgmath::Vector3::new(a, a, 0.0),
         ];
-        
+
         let normal = positions[0].cross(positions[1]).normalize();
         let normals = [normal, normal, normal, normal];
 
         let indices = [0, 1, 2, 3];
 
-        let mesh_data = MeshDataPoints{
+        let mesh_data = MeshDataPoints {
             positions: positions.into(),
             normals: normals.into(),
             indices: indices.into(),
@@ -38,11 +38,11 @@ impl Square {
     }
 }
 
-impl MeshDataInterface for Square {   
+impl MeshDataInterface for Square {
     fn points(&self) -> &MeshDataPoints {
         &self.mesh_data
     }
-    
+
     fn triangles(&self) -> &MeshDataTriangles {
         &self.mesh_data_triangles
     }

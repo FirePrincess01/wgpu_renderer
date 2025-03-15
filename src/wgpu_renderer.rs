@@ -210,12 +210,11 @@ impl WgpuRendererInterface for WgpuRenderer<'_> {
     fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError> {
         self.surface.get_current_texture()
     }
-    
+
     fn enable_vsync(&mut self, is_vsync_enabled: bool) {
         if is_vsync_enabled {
             self.config.present_mode = wgpu::PresentMode::AutoVsync;
-        }
-        else {
+        } else {
             self.config.present_mode = wgpu::PresentMode::AutoNoVsync;
         }
 

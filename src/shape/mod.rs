@@ -1,10 +1,10 @@
 //! a collection of shapes
 
-mod uv_sphere;
 mod square;
+mod uv_sphere;
 
-pub use uv_sphere::UVSphere;
 pub use square::Square;
+pub use uv_sphere::UVSphere;
 
 use cgmath::InnerSpace;
 
