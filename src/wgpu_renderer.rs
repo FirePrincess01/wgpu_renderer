@@ -18,6 +18,7 @@ pub trait WgpuRendererInterface {
     fn get_depth_texture_view(&self) -> &wgpu::TextureView;
     fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError>;
     fn enable_vsync(&mut self, is_vsync_enabled: bool);
+    fn request_window_size(&mut self, width: u32, height: u32);
 }
 
 pub struct WgpuRenderer<'a> {
@@ -27,6 +28,8 @@ pub struct WgpuRenderer<'a> {
     config: wgpu::SurfaceConfiguration,
     size: winit::dpi::PhysicalSize<u32>,
     depth_texture: depth_texture::DepthTexture,
+
+    window: Arc<Window>,
 }
 
 impl WgpuRenderer<'_> {
@@ -52,7 +55,7 @@ impl WgpuRenderer<'_> {
         //
         // The surface needs to live as long as the window that created it
         // State owns the window so this should be safe
-        let surface = { instance.create_surface(window) }.unwrap();
+        let surface = { instance.create_surface(window.clone()) }.unwrap();
 
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -140,6 +143,8 @@ impl WgpuRenderer<'_> {
             config,
             size,
             depth_texture,
+
+            window,
         }
     }
 
@@ -219,5 +224,9 @@ impl WgpuRendererInterface for WgpuRenderer<'_> {
         }
 
         self.surface.configure(&self.device, &self.config);
+    }
+    
+    fn request_window_size(&mut self, width: u32, height: u32) {
+        let _res = self.window.request_inner_size(PhysicalSize::new(width, height));
     }
 }
