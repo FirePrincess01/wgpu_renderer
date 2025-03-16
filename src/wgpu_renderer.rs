@@ -225,8 +225,10 @@ impl WgpuRendererInterface for WgpuRenderer<'_> {
 
         self.surface.configure(&self.device, &self.config);
     }
-    
+
     fn request_window_size(&mut self, width: u32, height: u32) {
-        let _res = self.window.request_inner_size(PhysicalSize::new(width, height));
+        let _res = self
+            .window
+            .request_inner_size(PhysicalSize::new(width, height));
     }
 }
