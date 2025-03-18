@@ -36,7 +36,7 @@ impl Grid {
             indices,
         };
 
-        let mesh_data_triangles = mesh_data.triangulate_grid(2);
+        let mesh_data_triangles = mesh_data.triangulate_grid(len);
 
         Self {
             mesh_data,
