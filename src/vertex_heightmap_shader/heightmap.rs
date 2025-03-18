@@ -14,7 +14,7 @@ pub struct Heightmap2D<'a> {
 }
 
 impl Heightmap {
-    pub fn _zero() -> Self {
+    pub fn zero() -> Self {
         Self { height: 0.0 }
     }
 }
