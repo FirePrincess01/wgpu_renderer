@@ -10,7 +10,7 @@ pub struct Grid {
 }
 
 impl Grid {
-    pub fn new(a: f32, len: usize) -> Self {
+    pub fn new(a: f32, len: usize, offset: usize) -> Self {
         let size = len * len;
 
         let mut positions: Vec<cgmath::Vector3<f32>> = Vec::with_capacity(size);
@@ -18,7 +18,7 @@ impl Grid {
         let mut indices: Vec<u32> = Vec::with_capacity(size);
         for y in 0 ..len {
             for x in 0 .. len {
-                positions.push(cgmath::Vector3 { x: x as f32 * a, y: y as f32 * a, z: 0.0 });
+                positions.push(cgmath::Vector3 { x: (x + offset) as f32 * a, y: (y + offset) as f32 * a, z: 0.0 });
             }
         }
 
