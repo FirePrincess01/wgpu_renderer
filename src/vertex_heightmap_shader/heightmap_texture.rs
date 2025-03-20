@@ -69,8 +69,8 @@ impl HeightmapTexture {
         texture: &wgpu::Texture,
     ) {
         let size = wgpu::Extent3d {
-            width: width,
-            height: height,
+            width,
+            height,
             depth_or_array_layers: 1,
         };
 
@@ -79,7 +79,7 @@ impl HeightmapTexture {
         queue.write_texture(
             wgpu::TexelCopyTextureInfo {
                 aspect: wgpu::TextureAspect::All,
-                texture: texture,
+                texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
             },
