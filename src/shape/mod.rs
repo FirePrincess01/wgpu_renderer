@@ -1,8 +1,10 @@
 //! a collection of shapes
 
+mod grid;
 mod square;
 mod uv_sphere;
 
+pub use grid::Grid;
 pub use square::Square;
 pub use uv_sphere::UVSphere;
 
@@ -17,14 +19,14 @@ pub trait MeshDataInterface {
 pub struct MeshDataPoints {
     pub positions: Vec<cgmath::Vector3<f32>>,
     pub normals: Vec<cgmath::Vector3<f32>>,
-    pub indices: Vec<u16>,
+    pub indices: Vec<u32>,
 }
 
 #[derive(Clone)]
 pub struct MeshDataTriangles {
     pub positions: Vec<cgmath::Vector3<f32>>,
     pub normals: Vec<cgmath::Vector3<f32>>,
-    pub indices: Vec<u16>,
+    pub indices: Vec<u32>,
 }
 
 impl MeshDataPoints {
@@ -66,7 +68,7 @@ impl MeshDataPoints {
 
                 let current_index = (y * (n - 1) + x) * 4;
                 for index in indices_local {
-                    indices_res.push(current_index as u16 + index as u16);
+                    indices_res.push(current_index as u32 + index);
                 }
             }
         }

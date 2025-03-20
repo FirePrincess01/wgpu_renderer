@@ -1,6 +1,8 @@
 //! Contains the device buffers to render an object with this shader
 //!
 
+use crate::wgpu_renderer::WgpuRendererInterface;
+
 use super::Heightmap;
 use super::Heightmap2D;
 use super::HeightmapBindGroupLayout;
@@ -25,7 +27,7 @@ pub struct Mesh {
 
 impl Mesh {
     pub fn new(
-        device: &wgpu::Device,
+        renderer: &mut dyn WgpuRendererInterface,
         vertices: &[Vertex],
         texture_index: usize,
         heightmap2d: &Heightmap2D,
@@ -33,19 +35,19 @@ impl Mesh {
         indices: &[u32],
         instances: &[Instance],
     ) -> Self {
-        let vertex_buffer = VertexBuffer::new(device, vertices);
+        let vertex_buffer = VertexBuffer::new(renderer.device(), vertices);
         let heightmap_texture = HeightmapTexture::new(
-            device,
+            renderer,
             heightmap_bind_group_layout,
             heightmap2d.data,
             heightmap2d.width,
             heightmap2d.height,
             Some("Heightmap Texture"),
         );
-        let index_buffer = IndexBuffer::new(device, indices);
+        let index_buffer = IndexBuffer::new(renderer.device(), indices);
 
         let instance_data = instances.iter().map(Instance::to_raw).collect::<Vec<_>>();
-        let instance_buffer = InstanceBuffer::new(device, &instance_data);
+        let instance_buffer = InstanceBuffer::new(renderer.device(), &instance_data);
 
         Self {
             vertex_buffer,

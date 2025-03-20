@@ -69,7 +69,7 @@ impl Mesh {
 
         let mut indices = Vec::new();
         for index in &shape.indices {
-            indices.push(*index as u32);
+            indices.push(*index);
         }
 
         Self::new(device, &vertices, &colors, &indices, instances)
