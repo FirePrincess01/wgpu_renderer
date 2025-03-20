@@ -46,7 +46,7 @@ impl HeightmapTexture {
                 layout: heightmap_bind_group_layout.get(),
                 entries: &[wgpu::BindGroupEntry {
                     binding: 0,
-                    resource: wgpu::BindingResource::TextureView(&view), // CHANGED!
+                    resource: wgpu::BindingResource::TextureView(&view),
                 }],
                 label: Some("texture_bind_group"),
             });
@@ -95,30 +95,6 @@ impl HeightmapTexture {
 
     pub fn update(&self, queue: &wgpu::Queue, heightmap: &[Heightmap]) {
         Self::do_update(queue, heightmap, self.width, self.height, &self.texture);
-
-        // let size = wgpu::Extent3d {
-        //     width: self.width,
-        //     height: self.height,
-        //     depth_or_array_layers: 1,
-        // };
-
-        // let data = bytemuck::cast_slice(heightmap);
-
-        // queue.write_texture(
-        //     wgpu::TexelCopyTextureInfo {
-        //         aspect: wgpu::TextureAspect::All,
-        //         texture: &self.texture,
-        //         mip_level: 0,
-        //         origin: wgpu::Origin3d::ZERO,
-        //     },
-        //     data,
-        //     wgpu::TexelCopyBufferLayout {
-        //         offset: 0,
-        //         bytes_per_row: Some(4 * self.width),
-        //         rows_per_image: Some(self.height),
-        //     },
-        //     size,
-        // );
     }
 
     pub fn bind<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
