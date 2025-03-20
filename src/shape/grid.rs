@@ -1,6 +1,6 @@
 //! A simple Grid
 
-use cgmath::{InnerSpace, Zero};
+use cgmath::Zero;
 
 use super::{MeshDataInterface, MeshDataPoints, MeshDataTriangles};
 
