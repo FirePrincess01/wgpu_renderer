@@ -16,15 +16,17 @@ impl Grid {
         let mut positions: Vec<cgmath::Vector3<f32>> = Vec::with_capacity(size);
         let mut normals: Vec<cgmath::Vector3<f32>> = Vec::with_capacity(size);
         let mut indices: Vec<u32> = Vec::with_capacity(size);
-        for y in 0 ..len {
-            for x in 0 .. len {
-                positions.push(cgmath::Vector3 { x: (x + offset) as f32 * a, y: (y + offset) as f32 * a, z: 0.0 });
+        for y in 0..len {
+            for x in 0..len {
+                positions.push(cgmath::Vector3 {
+                    x: (x + offset) as f32 * a,
+                    y: (y + offset) as f32 * a,
+                    z: 0.0,
+                });
             }
         }
 
-        normals.resize(size, 
-            cgmath::Vector3::zero());
-
+        normals.resize(size, cgmath::Vector3::zero());
 
         for i in 0..size {
             indices.push(i as u32);

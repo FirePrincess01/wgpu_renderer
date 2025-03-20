@@ -40,14 +40,16 @@ impl HeightmapTexture {
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
 
-        let bind_group = renderer.device().create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: heightmap_bind_group_layout.get(),
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: wgpu::BindingResource::TextureView(&view), // CHANGED!
-            }],
-            label: Some("texture_bind_group"),
-        });
+        let bind_group = renderer
+            .device()
+            .create_bind_group(&wgpu::BindGroupDescriptor {
+                layout: heightmap_bind_group_layout.get(),
+                entries: &[wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&view), // CHANGED!
+                }],
+                label: Some("texture_bind_group"),
+            });
 
         Self::do_update(renderer.queue(), heightmap, width, height, &texture);
 
@@ -59,8 +61,13 @@ impl HeightmapTexture {
         }
     }
 
-    fn do_update(queue: &wgpu::Queue, heightmap: &[Heightmap], width: u32, height: u32, texture: &wgpu::Texture)
-    {
+    fn do_update(
+        queue: &wgpu::Queue,
+        heightmap: &[Heightmap],
+        width: u32,
+        height: u32,
+        texture: &wgpu::Texture,
+    ) {
         let size = wgpu::Extent3d {
             width: width,
             height: height,

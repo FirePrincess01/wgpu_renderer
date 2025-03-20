@@ -1,12 +1,12 @@
 //! a collection of shapes
 
+mod grid;
 mod square;
 mod uv_sphere;
-mod grid;
 
+pub use grid::Grid;
 pub use square::Square;
 pub use uv_sphere::UVSphere;
-pub use grid::Grid;
 
 use cgmath::InnerSpace;
 

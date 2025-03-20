@@ -167,11 +167,31 @@ impl Texture {
                 let p3: Rgba<u8> = *rgba.get_pixel(2 * x, 2 * y + 1);
                 let p4: Rgba<u8> = *rgba.get_pixel(2 * x + 1, 2 * y + 1);
                 let averaged_pixel: Rgba<u8> = Rgba([
-                    ((p1[0] as f32 * p1[0] as f32 + p2[0] as f32 * p2[0] as f32 + p3[0] as f32 * p3[0] as f32 + p4[0] as f32 * p4[0] as f32).sqrt() / 2.) as u8,
-                    ((p1[1] as f32 * p1[1] as f32 + p2[1] as f32 * p2[1] as f32 + p3[1] as f32 * p3[1] as f32 + p4[1] as f32 * p4[1] as f32).sqrt() / 2.) as u8,
-                    ((p1[2] as f32 * p1[2] as f32 + p2[2] as f32 * p2[2] as f32 + p3[2] as f32 * p3[2] as f32 + p4[2] as f32 * p4[2] as f32).sqrt() / 2.) as u8,
-                    ((p1[3] as f32 * p1[3] as f32 + p2[3] as f32 * p2[3] as f32 + p3[3] as f32 * p3[3] as f32 + p4[3] as f32 * p4[3] as f32).sqrt() / 2.) as u8
-                    ]);
+                    ((p1[0] as f32 * p1[0] as f32
+                        + p2[0] as f32 * p2[0] as f32
+                        + p3[0] as f32 * p3[0] as f32
+                        + p4[0] as f32 * p4[0] as f32)
+                        .sqrt()
+                        / 2.) as u8,
+                    ((p1[1] as f32 * p1[1] as f32
+                        + p2[1] as f32 * p2[1] as f32
+                        + p3[1] as f32 * p3[1] as f32
+                        + p4[1] as f32 * p4[1] as f32)
+                        .sqrt()
+                        / 2.) as u8,
+                    ((p1[2] as f32 * p1[2] as f32
+                        + p2[2] as f32 * p2[2] as f32
+                        + p3[2] as f32 * p3[2] as f32
+                        + p4[2] as f32 * p4[2] as f32)
+                        .sqrt()
+                        / 2.) as u8,
+                    ((p1[3] as f32 * p1[3] as f32
+                        + p2[3] as f32 * p2[3] as f32
+                        + p3[3] as f32 * p3[3] as f32
+                        + p4[3] as f32 * p4[3] as f32)
+                        .sqrt()
+                        / 2.) as u8,
+                ]);
                 // small_image.put_pixel(x, y, p1); //averaged_pixel);
                 small_image.put_pixel(x, y, averaged_pixel);
             }
