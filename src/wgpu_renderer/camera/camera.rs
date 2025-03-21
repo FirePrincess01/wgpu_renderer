@@ -24,11 +24,7 @@ impl Camera {
     }
 
     pub fn calc_matrix(&self) -> Matrix4<f32> {
-        Matrix4::look_to_rh(
-            self.position,
-            self.get_view_direction(),
-            Vector3::unit_z(),
-        )
+        Matrix4::look_to_rh(self.position, self.get_view_direction(), Vector3::unit_z())
     }
 
     pub fn get_view_position(&self) -> Vector3<f32> {

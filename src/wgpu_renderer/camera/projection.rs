@@ -30,7 +30,7 @@ impl Projection {
             zfar,
 
             width,
-            height
+            height,
         }
     }
 
