@@ -13,9 +13,12 @@ pub const OPENGL_TO_WGPU_MATRIX: cgmath::Matrix4<f32> = cgmath::Matrix4::new(
 
 pub struct Projection {
     aspect: f32,
-    fovy: Rad<f32>,
+    pub fovy: Rad<f32>,
     znear: f32,
     zfar: f32,
+
+    pub width: u32,
+    pub height: u32,
 }
 
 impl Projection {
@@ -25,11 +28,16 @@ impl Projection {
             fovy: fovy.into(),
             znear,
             zfar,
+
+            width,
+            height,
         }
     }
 
     pub fn resize(&mut self, width: u32, height: u32) {
         self.aspect = width as f32 / height as f32;
+        self.width = width;
+        self.height = height;
     }
 
     pub fn calc_matrix(&self) -> Matrix4<f32> {

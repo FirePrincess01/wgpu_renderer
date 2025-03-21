@@ -1,17 +1,19 @@
 //! Contains the position and the rotation of an object
 //!
 
+use cgmath::Zero;
+
 #[derive(Copy, Clone)]
 pub struct Instance {
-    pub position: glam::Vec3,
-    pub rotation: glam::Quat,
+    pub position: cgmath::Vector3<f32>,
+    pub rotation: cgmath::Quaternion<f32>,
 }
 
 impl Instance {
     pub fn zero() -> Self {
         Self {
-            position: glam::Vec3::new(0.0, 0.0, 0.0),
-            rotation: glam::Quat::IDENTITY,
+            position: cgmath::Vector3::zero(),
+            rotation: cgmath::Quaternion::zero(),
         }
     }
 }
@@ -76,13 +78,11 @@ impl InstanceRaw {
 impl Instance {
     #[allow(clippy::wrong_self_convention)]
     pub fn to_raw(&self) -> InstanceRaw {
-        // InstanceRaw {
-        //     model: (cgmath::Matrix4::from_translation(self.position) * cgmath::Matrix4::from(self.rotation)).into(),
-        // }
+        let model =
+            cgmath::Matrix4::from_translation(self.position) * cgmath::Matrix4::from(self.rotation);
+
         InstanceRaw {
-            model: (glam::Mat4::from_translation(self.position)
-                * glam::Mat4::from_quat(self.rotation))
-            .to_cols_array_2d(),
+            model: model.into(),
         }
     }
 }
