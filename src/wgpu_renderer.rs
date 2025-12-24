@@ -17,7 +17,7 @@ pub trait WgpuRendererInterface {
     fn surface_format(&self) -> wgpu::TextureFormat;
     fn get_depth_texture_view(&self) -> &wgpu::TextureView;
     fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError>;
-    fn enable_vsync(&mut self, is_vsync_enabled: bool);
+    fn enable_vsync(&mut self, enabled: bool);
     fn request_window_size(&mut self, width: u32, height: u32);
 }
 
