@@ -17,7 +17,7 @@ use super::VertexColorShaderDraw;
 
 /// A general purpose shader using vertices, colors and an instance matrix
 pub struct Mesh {
-    vertex_buffer: VertexBuffer,
+    vertex_buffer: VertexBuffer<Vertex>,
     color_buffer: ColorBuffer,
     index_buffer: IndexBuffer<u32>,
     instance_buffer: InstanceBuffer<InstanceRaw>,

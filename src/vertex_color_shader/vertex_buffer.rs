@@ -1,25 +1,34 @@
 //! GPU memory buffer containing the vertices for this shader
 //!
 
-use super::Vertex;
 use wgpu::util::DeviceExt;
 
-pub struct VertexBuffer {
+pub struct VertexBuffer<TVertex>
+where
+    TVertex: bytemuck::Pod,
+{
     buffer: wgpu::Buffer,
+    phantom: std::marker::PhantomData<TVertex>,
 }
 
-impl VertexBuffer {
-    pub fn new(device: &wgpu::Device, vertices: &[Vertex]) -> Self {
+impl<TVertex> VertexBuffer<TVertex>
+where
+    TVertex: bytemuck::Pod,
+{
+    pub fn new(device: &wgpu::Device, vertices: &[TVertex]) -> Self {
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
             contents: bytemuck::cast_slice(vertices),
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
-        Self { buffer }
+        Self {
+            buffer,
+            phantom: std::marker::PhantomData,
+        }
     }
 
-    pub fn update(&mut self, queue: &wgpu::Queue, vertices: &[Vertex]) {
+    pub fn update(&mut self, queue: &wgpu::Queue, vertices: &[TVertex]) {
         let data = bytemuck::cast_slice(vertices);
 
         if self.buffer.size() == data.len() as u64 {
