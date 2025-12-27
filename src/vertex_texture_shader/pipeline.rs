@@ -71,7 +71,7 @@ impl Pipeline {
                     camera_bind_group_layout.get(),
                     texture_bind_group_layout.get(),
                 ],
-                push_constant_ranges: &[],
+                immediate_size: 0,
             });
 
         let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -121,8 +121,8 @@ impl Pipeline {
                 mask: !0,
                 alpha_to_coverage_enabled: false,
             },
-            multiview: None,
             cache: None,
+            multiview_mask: None,
         });
 
         Self { render_pipeline }

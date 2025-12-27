@@ -6,6 +6,7 @@ pub mod depth_texture;
 
 use std::sync::Arc;
 
+use wgpu::hal::ShouldBeNonZeroExt;
 use winit::{dpi::PhysicalSize, window::Window};
 
 pub trait WgpuRendererInterface {
@@ -47,6 +48,10 @@ impl WgpuRenderer<'_> {
             backends: wgpu::Backends::all(),
             flags: wgpu::InstanceFlags::default(),
             backend_options: wgpu::BackendOptions::default(),
+            memory_budget_thresholds: wgpu::MemoryBudgetThresholds {
+                for_resource_creation: None,
+                for_device_loss: None,
+            },
             // dx12_shader_compiler: Default::default(),
             // gles_minor_version: wgpu::Gles3MinorVersion::default(),
         });
@@ -95,8 +100,9 @@ impl WgpuRenderer<'_> {
                     },
                     label: None,
                     memory_hints: wgpu::MemoryHints::default(),
-                },
-                None,
+                    experimental_features: wgpu::ExperimentalFeatures::disabled(),
+                    trace: wgpu::Trace::Off,
+                }
             )
             .await
             .unwrap();
