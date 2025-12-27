@@ -41,8 +41,8 @@ impl<const SIZE: usize> Graph<SIZE> {
         const OFFSET_X: usize = 10;
         const OFFSET_Y: usize = 10;
 
-        let width: usize = (700 as f32 * scale_factor) as usize;
-        let height: usize = (210 as f32 * scale_factor) as usize;
+        let width: usize = (700_f32 * scale_factor) as usize;
+        let height: usize = (210_f32 * scale_factor) as usize;
         let nr_lines: usize = width - OFFSET_X;
         let line_length: usize = height - OFFSET_Y;
     
@@ -112,7 +112,7 @@ impl<const SIZE: usize> Graph<SIZE> {
             // },
         ];
 
-        return Geometry {
+        Geometry {
             len_per_micro,
             offset_x: OFFSET_X,
             offset_y: OFFSET_Y,
@@ -242,7 +242,7 @@ impl<const SIZE: usize> Graph<SIZE> {
 
     fn update_vertices(geometry: &Geometry, vertices: &mut [Vertex], line: &[f32]) {
         assert!(!vertices.is_empty());
-        assert!(vertices.len() % line.len() == 0);
+        assert!(vertices.len().is_multiple_of(line.len()));
 
         vertices.rotate_right(line.len());
 
