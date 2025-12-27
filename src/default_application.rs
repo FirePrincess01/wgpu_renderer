@@ -20,9 +20,11 @@ pub trait DefaultApplicationInterface {
         renderer_interface: &mut dyn WgpuRendererInterface,
         new_size: winit::dpi::PhysicalSize<u32>,
     );
-    fn update_scale_factor(&mut self, 
+    fn update_scale_factor(
+        &mut self,
         renderer_interface: &mut dyn WgpuRendererInterface,
-        scale_factor: f32);
+        scale_factor: f32,
+    );
     fn update(&mut self, renderer_interface: &mut dyn WgpuRendererInterface, dt: instant::Duration);
     fn input(&mut self, event: &winit::event::WindowEvent) -> bool;
     fn render(

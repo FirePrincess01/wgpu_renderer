@@ -28,7 +28,6 @@ pub struct Graph<const SIZE: usize> {
     color_gradient: colorous::Gradient,
 
     geometry: Geometry,
-
 }
 
 impl<const SIZE: usize> Graph<SIZE> {
@@ -37,7 +36,6 @@ impl<const SIZE: usize> Graph<SIZE> {
     const DURATION_30FPS: instant::Duration = std::time::Duration::from_micros(33333); // 30 fps
 
     fn create_geometry(scale_factor: f32) -> Geometry {
-        
         const OFFSET_X: usize = 10;
         const OFFSET_Y: usize = 10;
 
@@ -45,52 +43,41 @@ impl<const SIZE: usize> Graph<SIZE> {
         let height: usize = (210_f32 * scale_factor) as usize;
         let nr_lines: usize = width - OFFSET_X;
         let line_length: usize = height - OFFSET_Y;
-    
 
         let len_per_micro: f32 = line_length as f32 / Self::DURATION_30FPS.as_micros() as f32;
-
-
 
         let fps_lines: [Vertex; 6] = [
             Vertex {
                 position: [OFFSET_X as f32, OFFSET_Y as f32, 0.0],
             },
             Vertex {
+                position: [OFFSET_X as f32 + nr_lines as f32, OFFSET_Y as f32, 0.0],
+            },
+            Vertex {
+                position: [
+                    OFFSET_X as f32,
+                    OFFSET_Y as f32 + len_per_micro * Self::DURATION_120FPS.as_micros() as f32,
+                    0.0,
+                ],
+            },
+            Vertex {
                 position: [
                     OFFSET_X as f32 + nr_lines as f32,
-                    OFFSET_Y as f32,
+                    OFFSET_Y as f32 + len_per_micro * Self::DURATION_120FPS.as_micros() as f32,
                     0.0,
                 ],
             },
             Vertex {
                 position: [
                     OFFSET_X as f32,
-                    OFFSET_Y as f32
-                        + len_per_micro * Self::DURATION_120FPS.as_micros() as f32,
+                    OFFSET_Y as f32 + len_per_micro * Self::DURATION_60FPS.as_micros() as f32,
                     0.0,
                 ],
             },
             Vertex {
                 position: [
                     OFFSET_X as f32 + nr_lines as f32,
-                    OFFSET_Y as f32
-                        + len_per_micro * Self::DURATION_120FPS.as_micros() as f32,
-                    0.0,
-                ],
-            },
-            Vertex {
-                position: [
-                    OFFSET_X as f32,
-                    OFFSET_Y as f32
-                        + len_per_micro * Self::DURATION_60FPS.as_micros() as f32,
-                    0.0,
-                ],
-            },
-            Vertex {
-                position: [
-                    OFFSET_X as f32 + nr_lines as f32,
-                    OFFSET_Y as f32
-                        + len_per_micro * Self::DURATION_60FPS.as_micros() as f32,
+                    OFFSET_Y as f32 + len_per_micro * Self::DURATION_60FPS.as_micros() as f32,
                     0.0,
                 ],
             },
@@ -158,7 +145,8 @@ impl<const SIZE: usize> Graph<SIZE> {
             vec![Vertex::zero(); line_nr_vertices * geometry.nr_lines + geometry.fps_lines.len()];
         let mut colors =
             vec![Color::white(); line_nr_vertices * geometry.nr_lines + geometry.fps_lines.len()];
-        let mut indices = vec![0_u32; line_nr_vertices * geometry.nr_lines + geometry.fps_lines.len()];
+        let mut indices =
+            vec![0_u32; line_nr_vertices * geometry.nr_lines + geometry.fps_lines.len()];
 
         // vertices
         vertices[..geometry.fps_lines.len()].copy_from_slice(&geometry.fps_lines);
@@ -170,7 +158,8 @@ impl<const SIZE: usize> Graph<SIZE> {
             for j in 0..watch_points_size {
                 let color = color_gradient_vec[j];
 
-                colors[geometry.fps_lines.len() + i * line_nr_vertices + j * 2].color = color.into();
+                colors[geometry.fps_lines.len() + i * line_nr_vertices + j * 2].color =
+                    color.into();
                 colors[geometry.fps_lines.len() + i * line_nr_vertices + j * 2 + 1].color =
                     color.into();
             }
@@ -179,7 +168,7 @@ impl<const SIZE: usize> Graph<SIZE> {
             let gray = [0.5, 0.5, 0.5];
             colors[geometry.fps_lines.len() + i * line_nr_vertices + line_nr_vertices - 2].color =
                 gray;
-            colors[geometry.fps_lines.len()+ i * line_nr_vertices + line_nr_vertices - 1].color =
+            colors[geometry.fps_lines.len() + i * line_nr_vertices + line_nr_vertices - 1].color =
                 gray;
         }
 
