@@ -20,7 +20,11 @@ pub trait DefaultApplicationInterface {
         renderer_interface: &mut dyn WgpuRendererInterface,
         new_size: winit::dpi::PhysicalSize<u32>,
     );
-    fn update_scale_factor(&mut self, scale_factor: f32);
+    fn update_scale_factor(
+        &mut self,
+        renderer_interface: &mut dyn WgpuRendererInterface,
+        scale_factor: f32,
+    );
     fn update(&mut self, renderer_interface: &mut dyn WgpuRendererInterface, dt: instant::Duration);
     fn input(&mut self, event: &winit::event::WindowEvent) -> bool;
     fn render(
@@ -233,7 +237,7 @@ impl<ConcreteApplication: DefaultApplicationInterface> winit::application::Appli
                     scale_factor,
                     inner_size_writer: _,
                 } => {
-                    app.update_scale_factor(scale_factor as f32);
+                    app.update_scale_factor(wgpu_renderer, scale_factor as f32);
                 }
                 winit::event::WindowEvent::ThemeChanged(_theme) => {}
                 winit::event::WindowEvent::Occluded(_) => {}

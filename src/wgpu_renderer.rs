@@ -17,7 +17,7 @@ pub trait WgpuRendererInterface {
     fn surface_format(&self) -> wgpu::TextureFormat;
     fn get_depth_texture_view(&self) -> &wgpu::TextureView;
     fn get_current_texture(&self) -> Result<wgpu::SurfaceTexture, wgpu::SurfaceError>;
-    fn enable_vsync(&mut self, is_vsync_enabled: bool);
+    fn enable_vsync(&mut self, enabled: bool);
     fn request_window_size(&mut self, width: u32, height: u32);
 }
 
@@ -47,6 +47,10 @@ impl WgpuRenderer<'_> {
             backends: wgpu::Backends::all(),
             flags: wgpu::InstanceFlags::default(),
             backend_options: wgpu::BackendOptions::default(),
+            memory_budget_thresholds: wgpu::MemoryBudgetThresholds {
+                for_resource_creation: None,
+                for_device_loss: None,
+            },
             // dx12_shader_compiler: Default::default(),
             // gles_minor_version: wgpu::Gles3MinorVersion::default(),
         });
@@ -75,29 +79,28 @@ impl WgpuRenderer<'_> {
         // log::error!("compute shader: {}", compute_shader);
 
         let (device, queue) = adapter
-            .request_device(
-                &wgpu::DeviceDescriptor {
-                    required_features: wgpu::Features::empty(),
-                    // WebGL doesn't support all of wgpu's features, so if
-                    // we're building for the web we'll have to disable some.
-                    required_limits: if cfg!(target_arch = "wasm32") {
-                        let mut defaults = wgpu::Limits::downlevel_webgl2_defaults();
-                        defaults.max_texture_dimension_2d = 4096;
-                        defaults.max_color_attachment_bytes_per_sample = 64;
-                        defaults.max_buffer_size = 1024 << 20; // (1 GiB)
-                        defaults
-                    } else {
-                        wgpu::Limits {
-                            max_color_attachment_bytes_per_sample: 64,
-                            max_buffer_size: 1024 << 20, // (1 GiB)
-                            ..Default::default()
-                        }
-                    },
-                    label: None,
-                    memory_hints: wgpu::MemoryHints::default(),
+            .request_device(&wgpu::DeviceDescriptor {
+                required_features: wgpu::Features::empty(),
+                // WebGL doesn't support all of wgpu's features, so if
+                // we're building for the web we'll have to disable some.
+                required_limits: if cfg!(target_arch = "wasm32") {
+                    let mut defaults = wgpu::Limits::downlevel_webgl2_defaults();
+                    defaults.max_texture_dimension_2d = 4096;
+                    defaults.max_color_attachment_bytes_per_sample = 64;
+                    defaults.max_buffer_size = 1024 << 20; // (1 GiB)
+                    defaults
+                } else {
+                    wgpu::Limits {
+                        max_color_attachment_bytes_per_sample: 64,
+                        max_buffer_size: 1024 << 20, // (1 GiB)
+                        ..Default::default()
+                    }
                 },
-                None,
-            )
+                label: None,
+                memory_hints: wgpu::MemoryHints::default(),
+                experimental_features: wgpu::ExperimentalFeatures::disabled(),
+                trace: wgpu::Trace::Off,
+            })
             .await
             .unwrap();
 
