@@ -252,7 +252,7 @@ impl<const SIZE: usize> Graph<SIZE> {
 
     // pub fn get_height_30fps(&self) -> f32 {
     //     if self.geometry.fps_lines.len() >= 8 {
-            // self.geometry.fps_lines[6].position[1]
+    // self.geometry.fps_lines[6].position[1]
     //     } else {
     //         0.0
     //     }
