@@ -6,7 +6,6 @@ pub mod depth_texture;
 
 use std::sync::Arc;
 
-use wgpu::hal::ShouldBeNonZeroExt;
 use winit::{dpi::PhysicalSize, window::Window};
 
 pub trait WgpuRendererInterface {
