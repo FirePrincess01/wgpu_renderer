@@ -123,14 +123,20 @@ impl WgpuRenderer {
 
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: if surface_caps.formats.contains(&wgpu::TextureFormat::Rgba8UnormSrgb) {
+            format: if surface_caps
+                .formats
+                .contains(&wgpu::TextureFormat::Rgba8UnormSrgb)
+            {
                 wgpu::TextureFormat::Rgba8UnormSrgb
-            } else if surface_caps.formats.contains(&wgpu::TextureFormat::Rgba8Unorm) {
+            } else if surface_caps
+                .formats
+                .contains(&wgpu::TextureFormat::Rgba8Unorm)
+            {
                 wgpu::TextureFormat::Rgba8Unorm
             } else {
                 log::info!("surface_caps {:?}", surface_caps);
                 panic!("No suitable Texture Format found");
-            },            
+            },
             width: size.width,
             height: size.height,
             present_mode: {

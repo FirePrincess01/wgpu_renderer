@@ -33,7 +33,6 @@ pub trait DefaultApplicationInterface {
 }
 
 pub struct DefaultApplication<ConcreteApplication: DefaultApplicationInterface> {
-
     // state
     initial_size: Option<LogicalSize<u32>>,
     window: Option<Arc<winit::window::Window>>,
@@ -48,7 +47,6 @@ pub struct DefaultApplication<ConcreteApplication: DefaultApplicationInterface> 
 
 impl<ConcreteApplication: DefaultApplicationInterface> DefaultApplication<ConcreteApplication> {
     pub fn new(event_loop: &winit::event_loop::EventLoop<WgpuRenderer>) -> Self {
-
         #[cfg(target_arch = "wasm32")]
         {
             console_error_panic_hook::set_once();
@@ -79,20 +77,20 @@ impl<ConcreteApplication: DefaultApplicationInterface> DefaultApplication<Concre
     }
 }
 
-impl<ConcreteApplication: DefaultApplicationInterface> winit::application::ApplicationHandler<WgpuRenderer>
+impl<ConcreteApplication: DefaultApplicationInterface>
+    winit::application::ApplicationHandler<WgpuRenderer>
     for DefaultApplication<ConcreteApplication>
 {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        
         // create window
         #[allow(unused_mut)]
-        let mut window_attributes: window::WindowAttributes  = window::Window::default_attributes();
+        let mut window_attributes: window::WindowAttributes = window::Window::default_attributes();
 
         #[cfg(target_arch = "wasm32")]
         {
             use wasm_bindgen::JsCast;
             use winit::platform::web::WindowAttributesExtWebSys;
-            
+
             const CANVAS_ID: &str = "canvas";
 
             let window = wgpu::web_sys::window().unwrap();
@@ -108,7 +106,7 @@ impl<ConcreteApplication: DefaultApplicationInterface> winit::application::Appli
         }
 
         // log::info!("window_attributes {:?}", window_attributes);
-        
+
         let window = Arc::new(event_loop.create_window(window_attributes.clone()).unwrap());
 
         self.window = Some(window.clone());
@@ -117,26 +115,22 @@ impl<ConcreteApplication: DefaultApplicationInterface> winit::application::Appli
         // ControlFlow::Poll continuously runs the event loop, even if the OS hasn't
         // dispatched any events. This is ideal for games and similar applications.
         event_loop.set_control_flow(winit::event_loop::ControlFlow::Wait);
-        
+
         // Init wgpu
         let present_mode = Some(wgpu::PresentMode::Immediate);
         let proxy = self.proxy.clone();
 
         let create_wgpu_renderer = async move {
             let wgpu_renderer = WgpuRenderer::new(window.clone(), present_mode).await;
-                log::info!("WgpuRenderer created");
+            log::info!("WgpuRenderer created");
 
-                assert!(proxy
-                    .send_event(
-                        wgpu_renderer
-                    )
-                    .is_ok())
-            };
+            assert!(proxy.send_event(wgpu_renderer).is_ok())
+        };
 
         #[cfg(not(target_arch = "wasm32"))]
         {
             // If we are not on web we can use pollster to
-            // await the 
+            // await the
             pollster::block_on(create_wgpu_renderer);
         }
         #[cfg(target_arch = "wasm32")]
@@ -147,11 +141,14 @@ impl<ConcreteApplication: DefaultApplicationInterface> winit::application::Appli
         }
     }
 
-    fn user_event(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop, event: WgpuRenderer) {
-        
+    fn user_event(
+        &mut self,
+        _event_loop: &winit::event_loop::ActiveEventLoop,
+        event: WgpuRenderer,
+    ) {
         let window = self.window.as_ref().unwrap();
         let mut wgpu_renderer = event;
-        
+
         // create app
         let scale_factor = window.scale_factor();
         let size = window.inner_size();
