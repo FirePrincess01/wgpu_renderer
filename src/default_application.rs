@@ -2,8 +2,7 @@
 
 use std::sync::Arc;
 
-use pollster::FutureExt;
-use winit::window;
+use winit::{dpi::LogicalSize, window};
 
 use crate::wgpu_renderer::{WgpuRenderer, WgpuRendererInterface};
 
@@ -33,105 +32,146 @@ pub trait DefaultApplicationInterface {
     ) -> Result<(), wgpu::SurfaceError>;
 }
 
-pub struct StateApplication<'a, ConcreteApplication: DefaultApplicationInterface> {
-    window: Arc<winit::window::Window>,
-    wgpu_renderer: WgpuRenderer<'a>,
-    app: ConcreteApplication,
-}
+pub struct DefaultApplication<ConcreteApplication: DefaultApplicationInterface> {
+    // state
+    initial_size: Option<LogicalSize<u32>>,
+    window: Option<Arc<winit::window::Window>>,
+    wgpu_renderer: Option<WgpuRenderer>,
+    app: Option<ConcreteApplication>,
 
-impl<ConcreteApplication: DefaultApplicationInterface> StateApplication<'_, ConcreteApplication> {
-    fn window(&self) -> &window::Window {
-        &self.window
-    }
-}
-
-pub struct DefaultApplication<'a, ConcreteApplication: DefaultApplicationInterface> {
-    state: Option<StateApplication<'a, ConcreteApplication>>,
+    // Used to send cosutome events to the event loop
+    proxy: winit::event_loop::EventLoopProxy<WgpuRenderer>,
 
     last_render_time: instant::Instant,
 }
 
-impl<ConcreteApplication: DefaultApplicationInterface> Default
-    for DefaultApplication<'_, ConcreteApplication>
-{
-    fn default() -> Self {
-        Self::new()
-    }
-}
+impl<ConcreteApplication: DefaultApplicationInterface> DefaultApplication<ConcreteApplication> {
+    pub fn new(event_loop: &winit::event_loop::EventLoop<WgpuRenderer>) -> Self {
+        #[cfg(target_arch = "wasm32")]
+        {
+            console_error_panic_hook::set_once();
+            console_log::init_with_level(log::Level::Info).unwrap();
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            // env_logger::init();
+            let mut builder = env_logger::Builder::new();
+            builder.target(env_logger::Target::Stdout);
+            builder.filter_level(log::LevelFilter::Info);
+            builder.write_style(env_logger::WriteStyle::Always);
 
-impl<ConcreteApplication: DefaultApplicationInterface> DefaultApplication<'_, ConcreteApplication> {
-    pub fn new() -> Self {
+            builder.init();
+        }
+        log::info!("Logger initialized");
+
+        let proxy = event_loop.create_proxy();
+
         Self {
-            state: None,
+            initial_size: None,
+            window: None,
+            wgpu_renderer: None,
+            app: None,
             last_render_time: instant::Instant::now(),
+            proxy,
         }
     }
 }
 
-impl<ConcreteApplication: DefaultApplicationInterface> winit::application::ApplicationHandler
-    for DefaultApplication<'_, ConcreteApplication>
+impl<ConcreteApplication: DefaultApplicationInterface>
+    winit::application::ApplicationHandler<WgpuRenderer>
+    for DefaultApplication<ConcreteApplication>
 {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        // We need to toggle what logger we are using based on if we are in WASM land or not.
-        cfg_if::cfg_if! {
+        // create window
+        #[allow(unused_mut)]
+        let mut window_attributes: window::WindowAttributes = window::Window::default_attributes();
 
-            if #[cfg(target_arch = "wasm32")] {
-                std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-                console_log::init_with_level(log::Level::Info).expect("Couldn't initialize logger");
-            } else {
-                // env_logger::init();
-                let mut builder = env_logger::Builder::new();
-                builder.target(env_logger::Target::Stdout);
-                builder.filter_level(log::LevelFilter::Info);
-                builder.write_style(env_logger::WriteStyle::Always);
+        #[cfg(target_arch = "wasm32")]
+        {
+            use wasm_bindgen::JsCast;
+            use winit::platform::web::WindowAttributesExtWebSys;
 
-                builder.init();
-            }
+            const CANVAS_ID: &str = "canvas";
+
+            let window = wgpu::web_sys::window().unwrap();
+            let document = window.document().unwrap();
+            let canvas = document.get_element_by_id(CANVAS_ID).unwrap();
+            let html_canvas_element: wgpu::web_sys::HtmlCanvasElement = canvas.unchecked_into();
+            let width = html_canvas_element.width();
+            let height = html_canvas_element.height();
+            // log::info!("html_canvas_element {:?}", html_canvas_element);
+
+            window_attributes = window_attributes.with_canvas(Some(html_canvas_element));
+            self.initial_size = Some(LogicalSize::new(width, height));
         }
 
-        let window = event_loop
-            .create_window(winit::window::Window::default_attributes())
-            .unwrap();
+        // log::info!("window_attributes {:?}", window_attributes);
 
-        let window = Arc::new(window);
+        let window = Arc::new(event_loop.create_window(window_attributes.clone()).unwrap());
+
+        self.window = Some(window.clone());
+        log::info!("Window created");
 
         // ControlFlow::Poll continuously runs the event loop, even if the OS hasn't
         // dispatched any events. This is ideal for games and similar applications.
         event_loop.set_control_flow(winit::event_loop::ControlFlow::Wait);
 
-        // we need to add a canvas to the HTML document that we will host our application
-        #[cfg(target_arch = "wasm32")]
-        {
-            use winit::platform::web::WindowExtWebSys;
-            web_sys::window()
-                .and_then(|win| win.document())
-                .and_then(|doc| {
-                    let dst = doc.get_element_by_id("wasm-demo")?;
-                    let canvas = web_sys::Element::from(window.canvas().unwrap());
-                    dst.append_child(&canvas).ok()?;
-                    Some(())
-                })
-                .expect("Couldn't append canvas to document body.");
-        }
+        // Init wgpu
+        let present_mode = Some(wgpu::PresentMode::Immediate);
+        let proxy = self.proxy.clone();
 
-        let mut wgpu_renderer =
-            WgpuRenderer::new(window.clone(), Some(wgpu::PresentMode::Immediate)).block_on();
-        let size = window.inner_size();
-        let scale_factor = window.scale_factor();
-        let app = ConcreteApplication::create(&mut wgpu_renderer, size, scale_factor as f32);
+        let create_wgpu_renderer = async move {
+            let wgpu_renderer = WgpuRenderer::new(window.clone(), present_mode).await;
+            log::info!("WgpuRenderer created");
 
-        let state = StateApplication {
-            window,
-            wgpu_renderer,
-            app,
+            assert!(proxy.send_event(wgpu_renderer).is_ok())
         };
 
-        self.state = Some(state);
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            // If we are not on web we can use pollster to
+            // await the
+            pollster::block_on(create_wgpu_renderer);
+        }
+        #[cfg(target_arch = "wasm32")]
+        {
+            // Run the future asynchronously and use the
+            // proxy to send the results to the event loop
+            wasm_bindgen_futures::spawn_local(create_wgpu_renderer);
+        }
+    }
+
+    fn user_event(
+        &mut self,
+        _event_loop: &winit::event_loop::ActiveEventLoop,
+        event: WgpuRenderer,
+    ) {
+        let window = self.window.as_ref().unwrap();
+        let mut wgpu_renderer = event;
+
+        // create app
+        let scale_factor = window.scale_factor();
+        let size = window.inner_size();
+        let mut app = ConcreteApplication::create(&mut wgpu_renderer, size, scale_factor as f32);
+        // log::info!("size original: {} {}", size.width, size.height);
+        wgpu_renderer.resize(size);
+        app.resize(&mut wgpu_renderer, size);
+
+        self.wgpu_renderer = Some(wgpu_renderer);
+        self.app = Some(app);
+        log::info!("App created");
+
         self.last_render_time = instant::Instant::now();
+
+        window.request_redraw();
+        if let Some(initial_size) = self.initial_size {
+            // warkaround for webgl
+            let _res = window.request_inner_size(initial_size);
+        }
     }
 
     fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
-        let window = self.state.as_ref().unwrap().window();
+        let window = self.window.as_ref().unwrap();
         window.request_redraw();
     }
 
@@ -141,10 +181,15 @@ impl<ConcreteApplication: DefaultApplicationInterface> winit::application::Appli
         window_id: winit::window::WindowId,
         event: winit::event::WindowEvent,
     ) {
-        let state = self.state.as_mut().unwrap();
-        let window = state.window.as_ref();
-        let wgpu_renderer = &mut state.wgpu_renderer;
-        let app = &mut state.app;
+        if self.window.is_none() || self.wgpu_renderer.is_none() || self.app.is_none() {
+            log::info!("not yet initialized: {:?}", event);
+            // event_loop.exit();
+            return;
+        }
+
+        let window = self.window.as_ref().unwrap();
+        let wgpu_renderer = self.wgpu_renderer.as_mut().unwrap();
+        let app = self.app.as_mut().unwrap();
 
         if window.id() == window_id {
             if app.input(&event) {
@@ -237,6 +282,7 @@ impl<ConcreteApplication: DefaultApplicationInterface> winit::application::Appli
                     scale_factor,
                     inner_size_writer: _,
                 } => {
+                    log::info!("rescale: {}", scale_factor);
                     app.update_scale_factor(wgpu_renderer, scale_factor as f32);
                 }
                 winit::event::WindowEvent::ThemeChanged(_theme) => {}
