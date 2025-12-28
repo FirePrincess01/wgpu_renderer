@@ -21,8 +21,8 @@ pub trait WgpuRendererInterface {
     fn request_window_size(&mut self, width: u32, height: u32);
 }
 
-pub struct WgpuRenderer<'a> {
-    surface: wgpu::Surface<'a>,
+pub struct WgpuRenderer {
+    surface: wgpu::Surface<'static>,
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
@@ -32,7 +32,7 @@ pub struct WgpuRenderer<'a> {
     window: Arc<Window>,
 }
 
-impl WgpuRenderer<'_> {
+impl WgpuRenderer {
     pub async fn new(window: Arc<Window>, present_mode: Option<wgpu::PresentMode>) -> Self {
         let present_mode = present_mode.unwrap_or(wgpu::PresentMode::Fifo);
 
@@ -54,21 +54,24 @@ impl WgpuRenderer<'_> {
             // dx12_shader_compiler: Default::default(),
             // gles_minor_version: wgpu::Gles3MinorVersion::default(),
         });
+        log::info!("Instance created");
 
         // # Safety
         //
         // The surface needs to live as long as the window that created it
         // State owns the window so this should be safe
         let surface = { instance.create_surface(window.clone()) }.unwrap();
+        log::info!("Surface created");
 
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
-                power_preference: wgpu::PowerPreference::default(),
+                power_preference: wgpu::PowerPreference::HighPerformance,
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
             })
             .await
             .unwrap();
+        log::info!("Adapter created");
 
         // let downlevel_capabilities = adapter.get_downlevel_capabilities();
         // let downlevel_flags = downlevel_capabilities.flags;
@@ -86,12 +89,12 @@ impl WgpuRenderer<'_> {
                 required_limits: if cfg!(target_arch = "wasm32") {
                     let mut defaults = wgpu::Limits::downlevel_webgl2_defaults();
                     defaults.max_texture_dimension_2d = 4096;
-                    defaults.max_color_attachment_bytes_per_sample = 64;
+                    // defaults.max_color_attachment_bytes_per_sample = 64;
                     defaults.max_buffer_size = 1024 << 20; // (1 GiB)
                     defaults
                 } else {
                     wgpu::Limits {
-                        max_color_attachment_bytes_per_sample: 64,
+                        // max_color_attachment_bytes_per_sample: 64,
                         max_buffer_size: 1024 << 20, // (1 GiB)
                         ..Default::default()
                     }
@@ -103,23 +106,31 @@ impl WgpuRenderer<'_> {
             })
             .await
             .unwrap();
+        log::info!("Device created");
 
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code in this tutorial assumes an sRGB surface texture. Using a different
         // one will result all the colors coming out darker. If you want to support non
         // sRGB surfaces, you'll need to account to that when drawing to the frame.
-        #[allow(clippy::filter_next)]
-        let surface_format = surface_caps
-            .formats
-            .iter()
-            .copied()
-            .filter(|f| f.is_srgb())
-            .next()
-            .unwrap_or(surface_caps.formats[0]);
+        // #[allow(clippy::filter_next)]
+        // let surface_format = surface_caps
+        //     .formats
+        //     .iter()
+        //     .copied()
+        //     .filter(|f| f.is_srgb())
+        //     .next()
+        //     .unwrap_or(surface_caps.formats[0]);
 
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: surface_format,
+            format: if surface_caps.formats.contains(&wgpu::TextureFormat::Rgba8UnormSrgb) {
+                wgpu::TextureFormat::Rgba8UnormSrgb
+            } else if surface_caps.formats.contains(&wgpu::TextureFormat::Rgba8Unorm) {
+                wgpu::TextureFormat::Rgba8Unorm
+            } else {
+                log::info!("surface_caps {:?}", surface_caps);
+                panic!("No suitable Texture Format found");
+            },            
             width: size.width,
             height: size.height,
             present_mode: {
@@ -135,9 +146,11 @@ impl WgpuRenderer<'_> {
         };
 
         surface.configure(&device, &config);
+        log::info!("Surface configured");
 
         let depth_texture =
             depth_texture::DepthTexture::create_depth_texture(&device, &config, "depth_texture");
+        log::info!("Depth texture created");
 
         Self {
             surface,
@@ -190,7 +203,7 @@ impl WgpuRenderer<'_> {
     }
 }
 
-impl WgpuRendererInterface for WgpuRenderer<'_> {
+impl WgpuRendererInterface for WgpuRenderer {
     fn device(&mut self) -> &mut wgpu::Device {
         &mut self.device
     }
