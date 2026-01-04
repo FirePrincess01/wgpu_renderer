@@ -70,7 +70,7 @@ impl<const SIZE: usize> Watch<SIZE> {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct WatchPoint {
     pub start: instant::Instant,
     pub stop: instant::Instant,
@@ -87,7 +87,7 @@ impl WatchPoint {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct WatchViewerData<const SIZE: usize> {
     pub last_update_time: instant::Instant,
     pub update_time: instant::Instant,
