@@ -201,13 +201,13 @@ impl<const SIZE: usize> Graph<SIZE> {
         for (i, watch_point) in watch_points.iter().enumerate() {
             let j = i * 2;
 
-            let micros_start = if watch_point.start > last_update_time {
+            let micros_start = if watch_point.start >= last_update_time {
                 (watch_point.start - last_update_time).as_micros() as f32 * geometry.len_per_micro
             } else {
                 0.0
             };
 
-            let micros_stop = if watch_point.start > last_update_time {
+            let micros_stop = if watch_point.start >= last_update_time {
                 (watch_point.stop - last_update_time).as_micros() as f32 * geometry.len_per_micro
             } else {
                 0.0
@@ -235,12 +235,14 @@ impl<const SIZE: usize> Graph<SIZE> {
 
         vertices.rotate_right(line.len());
 
+        // set x pos of all lines
         for i in 0..vertices.len() / line.len() {
             for j in 0..line.len() {
                 vertices[i * line.len() + j].position[0] = i as f32 + geometry.offset_x as f32;
             }
         }
 
+        // set y pos of current lines
         for i in 0..line.len() {
             vertices[i].position[1] = line[i] + geometry.offset_y as f32;
         }
