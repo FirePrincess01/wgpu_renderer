@@ -226,7 +226,6 @@ impl<ConcreteApplication: DefaultApplicationInterface>
                             text: _,
                             location: _,
                             state: winit::event::ElementState::Pressed,
-                            repeat: _,
                             ..
                         },
                     is_synthetic: _,
