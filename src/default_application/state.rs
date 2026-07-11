@@ -1,45 +1,30 @@
-//! Instantiates the device to render with wgpu
-//!
-
-pub mod camera;
-pub mod depth_texture;
-
 use std::sync::Arc;
 
-use wgpu::CurrentSurfaceTexture;
 use winit::{dpi::PhysicalSize, window::Window};
 
-pub trait WgpuRendererInterface {
-    fn device(&mut self) -> &mut wgpu::Device;
-    fn queue(&mut self) -> &mut wgpu::Queue;
+use crate::wgpu_renderer::{WgpuRendererInterface, depth_texture};
 
-    fn surface_width(&self) -> u32;
-    fn surface_height(&self) -> u32;
-    fn surface_format(&self) -> wgpu::TextureFormat;
-    fn get_depth_texture_view(&self) -> &wgpu::TextureView;
-    fn get_current_texture(&self) -> wgpu::CurrentSurfaceTexture;
-    fn enable_vsync(&mut self, enabled: bool);
-    fn request_window_size(&mut self, width: u32, height: u32);
+
+
+pub struct State {
+    pub instance: wgpu::Instance,
+    pub window: Arc<winit::window::Window>,
+    pub device: wgpu::Device,
+    pub queue: wgpu::Queue,
+    pub size: winit::dpi::PhysicalSize<u32>,
+    pub surface: wgpu::Surface<'static>,
+    pub surface_format: wgpu::TextureFormat,
+    pub depth_texture: depth_texture::DepthTexture,
+    pub config: wgpu::SurfaceConfiguration,
 }
 
-pub struct WgpuRenderer {
-    surface: wgpu::Surface<'static>,
-    device: wgpu::Device,
-    queue: wgpu::Queue,
-    config: wgpu::SurfaceConfiguration,
-    size: winit::dpi::PhysicalSize<u32>,
-    depth_texture: depth_texture::DepthTexture,
-
-    window: Arc<Window>,
-}
-
-impl WgpuRenderer {
+impl State {
     pub async fn new(
-        display: winit::event_loop::OwnedDisplayHandle,
-        window: Arc<Window>, 
-        present_mode: Option<wgpu::PresentMode>
-    ) -> Self 
-    {
+        window: Arc<Window>,
+        instance: wgpu::Instance,
+        surface: wgpu::Surface<'static>,
+        present_mode: Option<wgpu::PresentMode>,
+    ) -> State {
         let present_mode = present_mode.unwrap_or(wgpu::PresentMode::Fifo);
 
         let size = PhysicalSize {
@@ -47,28 +32,6 @@ impl WgpuRenderer {
             height: 600,
         };
 
-        // The instance is a handle to our GPU
-        // Backends::all => Vulkan + Metal + DX12 + Browser WebGPU
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends: wgpu::Backends::all(),
-            flags: wgpu::InstanceFlags::default(),
-            backend_options: wgpu::BackendOptions::default(),
-            memory_budget_thresholds: wgpu::MemoryBudgetThresholds {
-                for_resource_creation: None,
-                for_device_loss: None,
-            },
-            display:  Some(Box::new(display)),
-            // dx12_shader_compiler: Default::default(),
-            // gles_minor_version: wgpu::Gles3MinorVersion::default(),
-        });
-        log::info!("Instance created");
-
-        // # Safety
-        //
-        // The surface needs to live as long as the window that created it
-        // State owns the window so this should be safe
-        let surface = { instance.create_surface(window.clone()) }.unwrap();
-        log::info!("Surface created");
 
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -79,15 +42,11 @@ impl WgpuRenderer {
             })
             .await
             .unwrap();
-        log::info!("Adapter created");
 
-        // let downlevel_capabilities = adapter.get_downlevel_capabilities();
-        // let downlevel_flags = downlevel_capabilities.flags;
-        // let vertex_storage = downlevel_flags.contains(wgpu::DownlevelFlags::VERTEX_STORAGE);
-        // let compute_shader = downlevel_flags.contains(wgpu::DownlevelFlags::COMPUTE_SHADERS);
-
-        // log::error!("vertex storage: {}", vertex_storage);
-        // log::error!("compute shader: {}", compute_shader);
+        // let adapter = instance
+        //     .request_adapter(&wgpu::RequestAdapterOptions::default())
+        //     .await
+        //     .unwrap();
 
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
@@ -116,6 +75,12 @@ impl WgpuRenderer {
             .unwrap();
         log::info!("Device created");
 
+        // let (device, queue) = adapter
+        //     .request_device(&wgpu::DeviceDescriptor::default())
+        //     .await
+        //     .unwrap();
+
+
         let surface_caps = surface.get_capabilities(&adapter);
         // Shader code in this tutorial assumes an sRGB surface texture. Using a different
         // one will result all the colors coming out darker. If you want to support non
@@ -129,7 +94,7 @@ impl WgpuRenderer {
         //     .next()
         //     .unwrap_or(surface_caps.formats[0]);
 
-        let format = if surface_caps
+        let surface_format = if surface_caps
                 .formats
                 .contains(&wgpu::TextureFormat::Rgba8UnormSrgb)
             {
@@ -146,7 +111,7 @@ impl WgpuRenderer {
 
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format,
+            format: surface_format,
             width: size.width,
             height: size.height,
             present_mode: {
@@ -169,23 +134,59 @@ impl WgpuRenderer {
             depth_texture::DepthTexture::create_depth_texture(&device, &config, "depth_texture");
         log::info!("Depth texture created");
 
-        Self {
-            surface,
+
+        // let size = window.inner_size();
+
+        // let surface = instance.create_surface(window.clone()).unwrap();
+        // let cap = surface.get_capabilities(&adapter);
+        // let surface_format = cap.formats[0];
+
+        let state = State {
+            instance,
+            window,
             device,
             queue,
-            config,
             size,
+            surface,
+            surface_format,
             depth_texture,
+            config,
+        };
 
-            window,
-        }
+        // Configure surface for the first time
+        state.configure_surface();
+
+        state
     }
 
-    pub fn size(&self) -> winit::dpi::PhysicalSize<u32> {
-        self.size
+    pub fn get_window(&self) -> &winit::window::Window {
+        &self.window
+    }
+
+    pub fn configure_surface(&self) {
+        // let surface_config = wgpu::SurfaceConfiguration {
+        //     usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+        //     format: self.surface_format,
+        //     color_space: wgpu::SurfaceColorSpace::Auto,
+        //     // Request compatibility with the sRGB-format texture view we‘re going to create later.
+        //     view_formats: vec![self.surface_format.add_srgb_suffix()],
+        //     alpha_mode: wgpu::CompositeAlphaMode::Auto,
+        //     width: self.size.width,
+        //     height: self.size.height,
+        //     desired_maximum_frame_latency: 2,
+        //     present_mode: wgpu::PresentMode::AutoVsync,
+        // };
+        // self.surface.configure(&self.device, &surface_config);
+
+        self.surface.configure(&self.device, &self.config)
     }
 
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+        self.size = new_size;
+
+        // reconfigure the surface
+        // self.configure_surface();
+
         if new_size.width > 0 && new_size.height > 0 {
             self.size = new_size;
             self.config.width = new_size.width;
@@ -199,28 +200,74 @@ impl WgpuRenderer {
         }
     }
 
-    pub fn device(&mut self) -> &mut wgpu::Device {
-        &mut self.device
-    }
+    pub fn render(&mut self) {
+        // Create texture view.
+        // NOTE: We must handle Timeout because the surface may be unavailable
+        // (e.g., when the window is occluded on macOS).
+        let surface_texture = match self.surface.get_current_texture() {
+            wgpu::CurrentSurfaceTexture::Success(texture) => texture,
+            wgpu::CurrentSurfaceTexture::Occluded | wgpu::CurrentSurfaceTexture::Timeout => return,
+            wgpu::CurrentSurfaceTexture::Suboptimal(texture) => {
+                drop(texture);
+                self.configure_surface();
+                return;
+            }
+            wgpu::CurrentSurfaceTexture::Outdated => {
+                self.configure_surface();
+                return;
+            }
+            wgpu::CurrentSurfaceTexture::Validation => {
+                unreachable!("No error scope registered, so validation errors will panic")
+            }
+            wgpu::CurrentSurfaceTexture::Lost => {
+                self.surface = self.instance.create_surface(self.window.clone()).unwrap();
+                self.configure_surface();
+                return;
+            }
+        };
+        let texture_view = surface_texture
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor {
+                // Without add_srgb_suffix() the image we will be working with
+                // might not be "gamma correct".
+                format: Some(self.surface_format.add_srgb_suffix()),
+                ..Default::default()
+            });
 
-    pub fn queue(&mut self) -> &mut wgpu::Queue {
-        &mut self.queue
-    }
+        // Renders a GREEN screen
+        let mut encoder = self.device.create_command_encoder(&Default::default());
+        // Create the renderpass which will clear the screen.
+        let renderpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: None,
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view: &texture_view,
+                depth_slice: None,
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
+                    store: wgpu::StoreOp::Store,
+                },
+            })],
+            depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None,
+            multiview_mask: None,
+        });
 
-    pub fn config(&self) -> &wgpu::SurfaceConfiguration {
-        &self.config
-    }
+        // If you wanted to call any drawing commands, they would go here.
 
-    pub fn get_current_texture(&self) -> CurrentSurfaceTexture {
-        self.surface.get_current_texture()
-    }
+        // End the renderpass.
+        drop(renderpass);
 
-    pub fn get_depth_texture_view(&self) -> &wgpu::TextureView {
-        &self.depth_texture.view
+        // Submit the command in the queue to execute
+        self.queue.submit([encoder.finish()]);
+        self.window.pre_present_notify();
+        self.queue.present(surface_texture);
     }
 }
 
-impl WgpuRendererInterface for WgpuRenderer {
+
+impl WgpuRendererInterface for State {
     fn device(&mut self) -> &mut wgpu::Device {
         &mut self.device
     }

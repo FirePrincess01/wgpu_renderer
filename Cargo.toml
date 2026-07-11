@@ -15,9 +15,9 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 cfg-if = "1"
 winit = "0.30"
-bytemuck = { version = "1.24", features = ["derive"] }
+bytemuck = { version = "1.25", features = ["derive"] }
 cgmath = { version = "0.18" }
-glam = { version = "0.30" }
+glam = { version = "0.33" }
 colorous = { version = "1.0" }
 anyhow = { version = "1.0" }
 rusttype = { version = "0.9" }
@@ -29,16 +29,16 @@ version = "0.25"
 features = ["png", "jpeg"]
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-pollster = { version = "0.4" }
+pollster = { version = "1.0" }
 env_logger = { version = "0.11" }
-wgpu = { version = "28.0" }
+wgpu = { version = "30.0" }
 instant = { version = "0.1" }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = { version = "0.1.7" }
 console_log = { version = "1.0.0" }
 instant = { version = "0.1", features = ["wasm-bindgen"] }
-wgpu = { version = "28.0", default-features = false, features = [
+wgpu = { version = "30.0", default-features = false, features = [
     "webgl",
     "wgsl",
 ] }
