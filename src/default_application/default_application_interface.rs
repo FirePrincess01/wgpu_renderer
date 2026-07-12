@@ -2,7 +2,6 @@
 
 use crate::wgpu_renderer::WgpuRendererInterface;
 
-
 pub trait DefaultApplicationInterfaceCreate {
     fn create(
         renderer_interface: &mut dyn WgpuRendererInterface,
@@ -32,12 +31,14 @@ pub trait DefaultApplicationInterfaceRuntime {
 }
 
 pub trait DefaultApplicationInterface:
-    DefaultApplicationInterfaceCreate + DefaultApplicationInterfaceRuntime {}
+    DefaultApplicationInterfaceCreate + DefaultApplicationInterfaceRuntime
+{
+}
 
-impl<T> DefaultApplicationInterface for T
-where
-    T: DefaultApplicationInterfaceCreate + DefaultApplicationInterfaceRuntime,
-{}
+impl<T> DefaultApplicationInterface for T where
+    T: DefaultApplicationInterfaceCreate + DefaultApplicationInterfaceRuntime
+{
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RenderError {

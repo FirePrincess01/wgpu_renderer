@@ -4,8 +4,6 @@
 pub mod camera;
 pub mod depth_texture;
 
-
-
 pub trait WgpuRendererInterface {
     fn device(&mut self) -> &mut wgpu::Device;
     fn queue(&mut self) -> &mut wgpu::Queue;
@@ -19,5 +17,3 @@ pub trait WgpuRendererInterface {
     fn request_window_size(&mut self, width: u32, height: u32);
     fn pre_present_notify(&mut self);
 }
-
-

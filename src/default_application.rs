@@ -1,14 +1,17 @@
 //! Using an event loop to call functions of a basic wgpu renderer application
 
-mod state;
-pub mod default_application_interface;
-mod user_app_builder;
 mod app;
-
+pub mod default_application_interface;
+mod state;
+mod user_app_builder;
 
 use winit::event_loop::EventLoop;
 
-use crate::default_application::{app::{App, UserEvent}, default_application_interface::DefaultApplicationInterface, user_app_builder::UserAppBuilder};
+use crate::default_application::{
+    app::{App, UserEvent},
+    default_application_interface::DefaultApplicationInterface,
+    user_app_builder::UserAppBuilder,
+};
 
 pub fn init_env_logger() {
     #[cfg(target_arch = "wasm32")]
@@ -30,13 +33,13 @@ pub fn init_env_logger() {
 }
 
 pub fn create_event_loop() -> winit::event_loop::EventLoop<UserEvent> {
-    let event_loop = winit::event_loop::EventLoop::<UserEvent>::with_user_event().build().unwrap();
+    let event_loop = winit::event_loop::EventLoop::<UserEvent>::with_user_event()
+        .build()
+        .unwrap();
     event_loop.set_control_flow(winit::event_loop::ControlFlow::Wait);
 
     event_loop
 }
-
-
 
 pub fn run_app<UserApp: DefaultApplicationInterface + 'static>(event_loop: EventLoop<UserEvent>) {
     let app = App {
@@ -58,6 +61,3 @@ pub fn run_app<UserApp: DefaultApplicationInterface + 'static>(event_loop: Event
         event_loop.spawn_app(app);
     }
 }
-
-
-

@@ -14,7 +14,6 @@ pub struct App {
     pub initial_size: Option<winit::dpi::LogicalSize<u32>>,
 }
 
-
 impl winit::application::ApplicationHandler<UserEvent> for App {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
         let Some(proxy) = self.proxy.take() else {
@@ -22,7 +21,8 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
         };
 
         #[allow(unused_mut)]
-        let mut window_attributes: winit::window::WindowAttributes = winit::window::Window::default_attributes();
+        let mut window_attributes: winit::window::WindowAttributes =
+            winit::window::Window::default_attributes();
 
         #[cfg(target_arch = "wasm32")]
         {
@@ -46,7 +46,6 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
         // log::info!("window_attributes {:?}", window_attributes);
 
         let window = Arc::new(event_loop.create_window(window_attributes.clone()).unwrap());
-
 
         // Create the surface here, on the main thread: winit only hands out the
         // raw window handle from the thread that owns the window (on Windows,
@@ -73,7 +72,7 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
         match event {
             UserEvent::Initialized(state) => {
                 let mut state = *state;
-  
+
                 let scale_factor = state.window.scale_factor();
                 let size = state.window.inner_size();
                 self.user_app.create(&mut state, size, scale_factor as f32);
@@ -88,15 +87,16 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
                     let _res = state.window.request_inner_size(initial_size);
                 }
 
-                self.state = Some(state);                
+                self.state = Some(state);
             }
         }
     }
 
-    fn window_event(&mut self, 
+    fn window_event(
+        &mut self,
         event_loop: &winit::event_loop::ActiveEventLoop,
-        window_id: winit::window::WindowId, 
-        event: winit::event::WindowEvent
+        window_id: winit::window::WindowId,
+        event: winit::event::WindowEvent,
     ) {
         let Some(state) = self.state.as_mut() else {
             log::info!("state not yet initialized: {:?}", event);
@@ -216,9 +216,8 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
                             let new_size = user_app.get_size();
                             state.resize(new_size);
                             user_app.resize(state, new_size);
-                        }
-                        // Err(wgpu::SurfaceError::OutOfMemory) => event_loop.exit(),
-                        // Err(e) => eprintln!("{:?}", e),
+                        } // Err(wgpu::SurfaceError::OutOfMemory) => event_loop.exit(),
+                          // Err(e) => eprintln!("{:?}", e),
                     }
                 }
                 _ => {}
@@ -234,14 +233,12 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
     // }
 }
 
-
 /// Events delivered to the winit loop from outside a `WindowEvent`.
 pub enum UserEvent {
     /// The async setup finished; carries the initialized `State`. Boxed to keep
     /// the event small (`State` is large).
     Initialized(Box<State>),
 }
-
 
 /// Run a future to completion concurrently: on a worker thread on native, or in
 /// the browser's event loop on the web (where blocking is not allowed).

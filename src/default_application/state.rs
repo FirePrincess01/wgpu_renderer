@@ -4,9 +4,7 @@ use std::sync::Arc;
 
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::wgpu_renderer::{WgpuRendererInterface, depth_texture};
-
-
+use crate::wgpu_renderer::{depth_texture, WgpuRendererInterface};
 
 pub struct State {
     pub instance: wgpu::Instance,
@@ -33,13 +31,12 @@ impl State {
             height: 600,
         };
 
-
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::HighPerformance,
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
-                 apply_limit_buckets: false,
+                apply_limit_buckets: false,
             })
             .await
             .unwrap();
@@ -74,19 +71,19 @@ impl State {
         let surface_caps = surface.get_capabilities(&adapter);
 
         let surface_format = if surface_caps
-                .formats
-                .contains(&wgpu::TextureFormat::Rgba8UnormSrgb)
-            {
-                wgpu::TextureFormat::Rgba8UnormSrgb
-            } else if surface_caps
-                .formats
-                .contains(&wgpu::TextureFormat::Rgba8Unorm)
-            {
-                wgpu::TextureFormat::Rgba8Unorm
-            } else {
-                log::info!("surface_caps {:?}", surface_caps);
-                panic!("No suitable Texture Format found");
-            };
+            .formats
+            .contains(&wgpu::TextureFormat::Rgba8UnormSrgb)
+        {
+            wgpu::TextureFormat::Rgba8UnormSrgb
+        } else if surface_caps
+            .formats
+            .contains(&wgpu::TextureFormat::Rgba8Unorm)
+        {
+            wgpu::TextureFormat::Rgba8Unorm
+        } else {
+            log::info!("surface_caps {:?}", surface_caps);
+            panic!("No suitable Texture Format found");
+        };
 
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -221,7 +218,6 @@ impl State {
     // }
 }
 
-
 impl WgpuRendererInterface for State {
     fn device(&mut self) -> &mut wgpu::Device {
         &mut self.device
@@ -248,7 +244,6 @@ impl WgpuRendererInterface for State {
     }
 
     fn get_current_texture(&self) -> wgpu::CurrentSurfaceTexture {
-        
         self.surface.get_current_texture()
     }
 
@@ -267,7 +262,7 @@ impl WgpuRendererInterface for State {
             .window
             .request_inner_size(PhysicalSize::new(width, height));
     }
-    
+
     fn pre_present_notify(&mut self) {
         self.window.pre_present_notify();
     }

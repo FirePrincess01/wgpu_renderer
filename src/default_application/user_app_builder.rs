@@ -1,9 +1,13 @@
 //! Holds an instance to a user app which can be created at a later point in time
-//! 
+//!
 //! Details: This object is meant to be used dynamically so template cascading can be avoided
 
-use crate::{default_application::default_application_interface::{DefaultApplicationInterface, DefaultApplicationInterfaceRuntime}, wgpu_renderer::WgpuRendererInterface};
-
+use crate::{
+    default_application::default_application_interface::{
+        DefaultApplicationInterface, DefaultApplicationInterfaceRuntime,
+    },
+    wgpu_renderer::WgpuRendererInterface,
+};
 
 pub struct UserAppBuilder<UserApp: DefaultApplicationInterface> {
     user_app: Option<UserApp>,
@@ -15,9 +19,9 @@ impl<UserApp: DefaultApplicationInterface> UserAppBuilder<UserApp> {
     }
 }
 
-impl <UserApp: DefaultApplicationInterface> UserAppBuilderInterface for UserAppBuilder<UserApp> {
-
-    fn create(&mut self,
+impl<UserApp: DefaultApplicationInterface> UserAppBuilderInterface for UserAppBuilder<UserApp> {
+    fn create(
+        &mut self,
         renderer_interface: &mut dyn WgpuRendererInterface,
         size: winit::dpi::PhysicalSize<u32>,
         scale_factor: f32,
@@ -34,7 +38,8 @@ impl <UserApp: DefaultApplicationInterface> UserAppBuilderInterface for UserAppB
 }
 
 pub trait UserAppBuilderInterface {
-    fn create(&mut self,
+    fn create(
+        &mut self,
         renderer_interface: &mut dyn WgpuRendererInterface,
         size: winit::dpi::PhysicalSize<u32>,
         scale_factor: f32,

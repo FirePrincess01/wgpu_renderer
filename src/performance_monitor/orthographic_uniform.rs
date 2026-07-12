@@ -2,9 +2,10 @@
 //!
 
 use super::super::vertex_color_shader::camera_uniform::CameraUniform;
-use cgmath::{Matrix4, ortho};
+use cgmath::{ortho, Matrix4};
 
 impl CameraUniform {
+    #[rustfmt::skip]
     pub const OPENGL_TO_WGPU_MATRIX: Matrix4<f32> = Matrix4::new(
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
@@ -12,8 +13,8 @@ impl CameraUniform {
         0.0, 0.0, 0.5, 1.0,
     );
 
-
     pub fn new_orthographic(width: u32, height: u32) -> Self {
+        #[rustfmt::skip]
         let mat = ortho(
             0.0,
             width as f32,
@@ -32,6 +33,7 @@ impl CameraUniform {
     }
 
     pub fn resize_orthographic(&mut self, width: u32, height: u32) {
+        #[rustfmt::skip]
         let mat = ortho(
             0.0,
             width as f32,
