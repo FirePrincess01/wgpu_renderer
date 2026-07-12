@@ -32,7 +32,7 @@ pub fn init_env_logger() {
 
 pub fn create_event_loop() -> winit::event_loop::EventLoop<UserEvent> {
     let event_loop = winit::event_loop::EventLoop::<UserEvent>::with_user_event().build().unwrap();
-    event_loop.set_control_flow(winit::event_loop::ControlFlow::Poll);
+    event_loop.set_control_flow(winit::event_loop::ControlFlow::Wait);
 
     event_loop
 }

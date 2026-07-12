@@ -228,9 +228,9 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
 
     // fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
     //     //  log::info!("about_to_wait");
-    //     // if let Some(state) = &self.state {
-    //     //     state.window.request_redraw();
-    //     // }
+    //     if let Some(state) = &self.state {
+    //         state.window.request_redraw();
+    //     }
     // }
 }
 
