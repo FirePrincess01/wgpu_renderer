@@ -4,10 +4,7 @@
 pub mod camera;
 pub mod depth_texture;
 
-use std::sync::Arc;
 
-use wgpu::CurrentSurfaceTexture;
-use winit::{dpi::PhysicalSize, window::Window};
 
 pub trait WgpuRendererInterface {
     fn device(&mut self) -> &mut wgpu::Device;

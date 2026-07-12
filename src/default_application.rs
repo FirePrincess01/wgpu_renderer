@@ -5,11 +5,10 @@ pub mod default_application_interface;
 mod user_app_builder;
 mod app;
 
-use std::sync::Arc;
 
-use winit::{dpi::LogicalSize, event_loop::{self, EventLoop}, window};
+use winit::event_loop::EventLoop;
 
-use crate::{default_application::{app::{App, UserEvent}, default_application_interface::DefaultApplicationInterface, state::State, user_app_builder::{UserAppBuilder, UserAppBuilderInterface}}, wgpu_renderer::WgpuRendererInterface};
+use crate::default_application::{app::{App, UserEvent}, default_application_interface::DefaultApplicationInterface, user_app_builder::UserAppBuilder};
 
 pub fn init_env_logger() {
     #[cfg(target_arch = "wasm32")]
