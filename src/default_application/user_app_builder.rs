@@ -25,7 +25,7 @@ impl <UserApp: DefaultApplicationInterface> UserAppBuilderInterface for UserAppB
         self.user_app = Some(UserApp::create(renderer_interface, size, scale_factor))
     }
 
-    fn get<'a>(&'a mut self) -> Option<&'a mut dyn DefaultApplicationInterfaceRuntime> {
+    fn get(&mut self) -> Option<&mut dyn DefaultApplicationInterfaceRuntime> {
         match &mut self.user_app {
             Some(user_app) => Some(user_app),
             None => None,
@@ -40,5 +40,5 @@ pub trait UserAppBuilderInterface {
         scale_factor: f32,
     );
 
-    fn get<'a>(&'a mut self) -> Option<&'a mut dyn DefaultApplicationInterfaceRuntime>;
+    fn get(&mut self) -> Option<&mut dyn DefaultApplicationInterfaceRuntime>;
 }

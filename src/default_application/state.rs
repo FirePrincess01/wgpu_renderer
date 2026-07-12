@@ -248,8 +248,8 @@ impl WgpuRendererInterface for State {
     }
 
     fn get_current_texture(&self) -> wgpu::CurrentSurfaceTexture {
-        let res = self.surface.get_current_texture();
-        res
+        
+        self.surface.get_current_texture()
     }
 
     fn enable_vsync(&mut self, is_vsync_enabled: bool) {
