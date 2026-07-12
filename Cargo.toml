@@ -17,7 +17,6 @@ cfg-if = "1"
 winit = "0.30"
 bytemuck = { version = "1.25", features = ["derive"] }
 cgmath = { version = "0.18" }
-glam = { version = "0.33" }
 colorous = { version = "1.0" }
 anyhow = { version = "1.0" }
 rusttype = { version = "0.9" }
