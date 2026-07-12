@@ -312,4 +312,8 @@ impl WgpuRendererInterface for State {
             .window
             .request_inner_size(PhysicalSize::new(width, height));
     }
+    
+    fn pre_present_notify(&mut self) {
+        self.window.pre_present_notify();
+    }
 }

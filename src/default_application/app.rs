@@ -115,9 +115,13 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
                 self.last_render_time = instant::Instant::now();
 
                 state.window.request_redraw();
-                self.state = Some(state);
 
-                
+                if let Some(initial_size) = self.initial_size {
+                    // warkaround for webgl
+                    let _res = state.window.request_inner_size(initial_size);
+                }
+
+                self.state = Some(state);                
             }
         }
     }
@@ -137,142 +141,122 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
             return;
         };
 
-
-
-        match event {
-            WindowEvent::CloseRequested => event_loop.exit(),
-            WindowEvent::Resized(size) => {
-                state.resize(size);
-                // A resize can also land the window on another monitor, so
-                // re-query here too.
-                // state.requery_display_hdr_info("window resized");
-                state.window.request_redraw();
+        if state.window.id() == window_id {
+            if user_app.input(&event) {
+                // event consumed directly by the application
+                return;
             }
-            // The main signal for a monitor change. winit doesn't deliver it on
-            // Wayland or web, so they won't react (see `requery_display_hdr_info`).
-            // WindowEvent::Moved(_) => state.requery_display_hdr_info("window moved"),
-            // The test pattern is static, so we render on demand (startup, OS
-            // expose, resize) rather than spinning a continuous redraw loop.
-            WindowEvent::RedrawRequested => state.render(),
-            _ => {}
+
+            match event {
+                winit::event::WindowEvent::ActivationTokenDone {
+                    serial: _,
+                    token: _,
+                } => {}
+                winit::event::WindowEvent::Resized(physical_size) => {
+                    log::info!("resize: {} {}", physical_size.width, physical_size.height);
+                    state.resize(physical_size);
+                    user_app.resize(state, physical_size);
+                }
+                winit::event::WindowEvent::Moved(_physical_position) => {}
+                winit::event::WindowEvent::CloseRequested => {
+                    event_loop.exit();
+                }
+                winit::event::WindowEvent::Destroyed => {}
+                winit::event::WindowEvent::DroppedFile(_path_buf) => {}
+                winit::event::WindowEvent::HoveredFile(_path_buf) => {}
+                winit::event::WindowEvent::HoveredFileCancelled => {}
+                winit::event::WindowEvent::Focused(_) => {}
+                winit::event::WindowEvent::KeyboardInput {
+                    device_id: _,
+                    event:
+                        winit::event::KeyEvent {
+                            physical_key:
+                                winit::keyboard::PhysicalKey::Code(winit::keyboard::KeyCode::Escape),
+                            logical_key: _,
+                            text: _,
+                            location: _,
+                            state: winit::event::ElementState::Pressed,
+                            ..
+                        },
+                    is_synthetic: _,
+                } => {
+                    event_loop.exit();
+                }
+                winit::event::WindowEvent::ModifiersChanged(_modifiers) => {}
+                winit::event::WindowEvent::Ime(_ime) => {}
+                winit::event::WindowEvent::CursorMoved {
+                    device_id: _,
+                    position: _,
+                } => {}
+                winit::event::WindowEvent::CursorEntered { device_id: _ } => {}
+                winit::event::WindowEvent::CursorLeft { device_id: _ } => {}
+                winit::event::WindowEvent::MouseWheel {
+                    device_id: _,
+                    delta: _,
+                    phase: _,
+                } => {}
+                winit::event::WindowEvent::MouseInput {
+                    device_id: _,
+                    state: _,
+                    button: _,
+                } => {}
+                winit::event::WindowEvent::PinchGesture {
+                    device_id: _,
+                    delta: _,
+                    phase: _,
+                } => {}
+                winit::event::WindowEvent::PanGesture {
+                    device_id: _,
+                    delta: _,
+                    phase: _,
+                } => {}
+                winit::event::WindowEvent::DoubleTapGesture { device_id: _ } => {}
+                winit::event::WindowEvent::RotationGesture {
+                    device_id: _,
+                    delta: _,
+                    phase: _,
+                } => {}
+                winit::event::WindowEvent::TouchpadPressure {
+                    device_id: _,
+                    pressure: _,
+                    stage: _,
+                } => {}
+                winit::event::WindowEvent::AxisMotion {
+                    device_id: _,
+                    axis: _,
+                    value: _,
+                } => {}
+                winit::event::WindowEvent::Touch(_touch) => {}
+                winit::event::WindowEvent::ScaleFactorChanged {
+                    scale_factor,
+                    inner_size_writer: _,
+                } => {
+                    log::info!("rescale: {}", scale_factor);
+                    user_app.update_scale_factor(state, scale_factor as f32);
+                }
+                winit::event::WindowEvent::ThemeChanged(_theme) => {}
+                winit::event::WindowEvent::Occluded(_) => {}
+                winit::event::WindowEvent::RedrawRequested => {
+                    let now = instant::Instant::now();
+                    let dt = now - self.last_render_time;
+                    self.last_render_time = now;
+
+                    user_app.update(state, dt);
+                    match user_app.render(state) {
+                        Ok(_) => state.window.request_redraw(),
+                        // Reconfigure the surface if lost
+                        Err(_) => {
+                            let new_size = user_app.get_size();
+                            state.resize(new_size);
+                            user_app.resize(state, new_size);
+                        }
+                        // Err(wgpu::SurfaceError::OutOfMemory) => event_loop.exit(),
+                        // Err(e) => eprintln!("{:?}", e),
+                    }
+                }
+                _ => {}
+            }
         }
-
-    //     if state.window.id() == window_id {
-    //         if user_app.input(&event) {
-    //             // event consumed directly by the application
-    //             return;
-    //         }
-
-    //         match event {
-    //             winit::event::WindowEvent::ActivationTokenDone {
-    //                 serial: _,
-    //                 token: _,
-    //             } => {}
-    //             winit::event::WindowEvent::Resized(physical_size) => {
-    //                 log::info!("resize: {} {}", physical_size.width, physical_size.height);
-    //                 state.resize(physical_size);
-    //                 user_app.resize(state, physical_size);
-    //             }
-    //             winit::event::WindowEvent::Moved(_physical_position) => {}
-    //             winit::event::WindowEvent::CloseRequested => {
-    //                 event_loop.exit();
-    //             }
-    //             winit::event::WindowEvent::Destroyed => {}
-    //             winit::event::WindowEvent::DroppedFile(_path_buf) => {}
-    //             winit::event::WindowEvent::HoveredFile(_path_buf) => {}
-    //             winit::event::WindowEvent::HoveredFileCancelled => {}
-    //             winit::event::WindowEvent::Focused(_) => {}
-    //             winit::event::WindowEvent::KeyboardInput {
-    //                 device_id: _,
-    //                 event:
-    //                     winit::event::KeyEvent {
-    //                         physical_key:
-    //                             winit::keyboard::PhysicalKey::Code(winit::keyboard::KeyCode::Escape),
-    //                         logical_key: _,
-    //                         text: _,
-    //                         location: _,
-    //                         state: winit::event::ElementState::Pressed,
-    //                         ..
-    //                     },
-    //                 is_synthetic: _,
-    //             } => {
-    //                 event_loop.exit();
-    //             }
-    //             winit::event::WindowEvent::ModifiersChanged(_modifiers) => {}
-    //             winit::event::WindowEvent::Ime(_ime) => {}
-    //             winit::event::WindowEvent::CursorMoved {
-    //                 device_id: _,
-    //                 position: _,
-    //             } => {}
-    //             winit::event::WindowEvent::CursorEntered { device_id: _ } => {}
-    //             winit::event::WindowEvent::CursorLeft { device_id: _ } => {}
-    //             winit::event::WindowEvent::MouseWheel {
-    //                 device_id: _,
-    //                 delta: _,
-    //                 phase: _,
-    //             } => {}
-    //             winit::event::WindowEvent::MouseInput {
-    //                 device_id: _,
-    //                 state: _,
-    //                 button: _,
-    //             } => {}
-    //             winit::event::WindowEvent::PinchGesture {
-    //                 device_id: _,
-    //                 delta: _,
-    //                 phase: _,
-    //             } => {}
-    //             winit::event::WindowEvent::PanGesture {
-    //                 device_id: _,
-    //                 delta: _,
-    //                 phase: _,
-    //             } => {}
-    //             winit::event::WindowEvent::DoubleTapGesture { device_id: _ } => {}
-    //             winit::event::WindowEvent::RotationGesture {
-    //                 device_id: _,
-    //                 delta: _,
-    //                 phase: _,
-    //             } => {}
-    //             winit::event::WindowEvent::TouchpadPressure {
-    //                 device_id: _,
-    //                 pressure: _,
-    //                 stage: _,
-    //             } => {}
-    //             winit::event::WindowEvent::AxisMotion {
-    //                 device_id: _,
-    //                 axis: _,
-    //                 value: _,
-    //             } => {}
-    //             winit::event::WindowEvent::Touch(_touch) => {}
-    //             winit::event::WindowEvent::ScaleFactorChanged {
-    //                 scale_factor,
-    //                 inner_size_writer: _,
-    //             } => {
-    //                 log::info!("rescale: {}", scale_factor);
-    //                 user_app.update_scale_factor(state, scale_factor as f32);
-    //             }
-    //             winit::event::WindowEvent::ThemeChanged(_theme) => {}
-    //             winit::event::WindowEvent::Occluded(_) => {}
-    //             winit::event::WindowEvent::RedrawRequested => {
-    //                 let now = instant::Instant::now();
-    //                 let dt = now - self.last_render_time;
-    //                 self.last_render_time = now;
-
-    //                 user_app.update(state, dt);
-    //                 match user_app.render(state) {
-    //                     Ok(_) => state.window.request_redraw(),
-    //                     // Reconfigure the surface if lost
-    //                     Err(_) => {
-    //                         let new_size = user_app.get_size();
-    //                         state.resize(new_size);
-    //                         user_app.resize(state, new_size);
-    //                     }
-    //                     // Err(wgpu::SurfaceError::OutOfMemory) => event_loop.exit(),
-    //                     // Err(e) => eprintln!("{:?}", e),
-    //                 }
-    //             }
-    //             _ => {}
-    //         }
-    //     }
     }
 }
 

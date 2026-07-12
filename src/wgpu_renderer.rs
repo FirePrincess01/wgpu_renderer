@@ -20,6 +20,7 @@ pub trait WgpuRendererInterface {
     fn get_current_texture(&self) -> wgpu::CurrentSurfaceTexture;
     fn enable_vsync(&mut self, enabled: bool);
     fn request_window_size(&mut self, width: u32, height: u32);
+    fn pre_present_notify(&mut self);
 }
 
 pub struct WgpuRenderer {
@@ -264,5 +265,9 @@ impl WgpuRendererInterface for WgpuRenderer {
         let _res = self
             .window
             .request_inner_size(PhysicalSize::new(width, height));
+    }
+    
+    fn pre_present_notify(&mut self) {
+        self.window.pre_present_notify();
     }
 }
