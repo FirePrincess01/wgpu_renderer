@@ -1,7 +1,7 @@
 //! Contains the position and the rotation of an object
 //!
 
-use cgmath::Zero;
+use cgmath::{Matrix4, SquareMatrix, Zero};
 
 #[derive(Copy, Clone)]
 pub struct Instance {
@@ -32,7 +32,7 @@ impl Default for InstanceRaw {
 
 impl InstanceRaw {
     pub fn new() -> Self {
-        let model = glam::Mat4::IDENTITY.to_cols_array_2d();
+        let model: [[f32; 4]; 4] = Matrix4::identity().into();
 
         Self { model }
     }
