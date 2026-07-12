@@ -28,7 +28,7 @@ pub trait DefaultApplicationInterfaceRuntime {
     fn render(
         &mut self,
         renderer_interface: &mut dyn WgpuRendererInterface,
-    ) -> Result<(), ()>;
+    ) -> Result<(), RenderError>;
 }
 
 pub trait DefaultApplicationInterface:
@@ -38,3 +38,11 @@ impl<T> DefaultApplicationInterface for T
 where
     T: DefaultApplicationInterfaceCreate + DefaultApplicationInterfaceRuntime,
 {}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RenderError {
+    SurfaceOccluded,
+    SurfaceOutdated,
+    SurfaceLost,
+    SurfaceValidation,
+}
