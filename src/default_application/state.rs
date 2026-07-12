@@ -1,3 +1,5 @@
+//! Holds the interface to the gpu and the window
+
 use std::sync::Arc;
 
 use winit::{dpi::PhysicalSize, window::Window};
@@ -42,11 +44,6 @@ impl State {
             .await
             .unwrap();
 
-        // let adapter = instance
-        //     .request_adapter(&wgpu::RequestAdapterOptions::default())
-        //     .await
-        //     .unwrap();
-
         let (device, queue) = adapter
             .request_device(&wgpu::DeviceDescriptor {
                 required_features: wgpu::Features::empty(),
@@ -74,24 +71,7 @@ impl State {
             .unwrap();
         log::info!("Device created");
 
-        // let (device, queue) = adapter
-        //     .request_device(&wgpu::DeviceDescriptor::default())
-        //     .await
-        //     .unwrap();
-
-
         let surface_caps = surface.get_capabilities(&adapter);
-        // Shader code in this tutorial assumes an sRGB surface texture. Using a different
-        // one will result all the colors coming out darker. If you want to support non
-        // sRGB surfaces, you'll need to account to that when drawing to the frame.
-        // #[allow(clippy::filter_next)]
-        // let surface_format = surface_caps
-        //     .formats
-        //     .iter()
-        //     .copied()
-        //     .filter(|f| f.is_srgb())
-        //     .next()
-        //     .unwrap_or(surface_caps.formats[0]);
 
         let surface_format = if surface_caps
                 .formats
@@ -133,13 +113,6 @@ impl State {
             depth_texture::DepthTexture::create_depth_texture(&device, &config, "depth_texture");
         log::info!("Depth texture created");
 
-
-        // let size = window.inner_size();
-
-        // let surface = instance.create_surface(window.clone()).unwrap();
-        // let cap = surface.get_capabilities(&adapter);
-        // let surface_format = cap.formats[0];
-
         let state = State {
             instance,
             window,
@@ -163,28 +136,11 @@ impl State {
     }
 
     pub fn configure_surface(&self) {
-        // let surface_config = wgpu::SurfaceConfiguration {
-        //     usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-        //     format: self.surface_format,
-        //     color_space: wgpu::SurfaceColorSpace::Auto,
-        //     // Request compatibility with the sRGB-format texture view we‘re going to create later.
-        //     view_formats: vec![self.surface_format.add_srgb_suffix()],
-        //     alpha_mode: wgpu::CompositeAlphaMode::Auto,
-        //     width: self.size.width,
-        //     height: self.size.height,
-        //     desired_maximum_frame_latency: 2,
-        //     present_mode: wgpu::PresentMode::AutoVsync,
-        // };
-        // self.surface.configure(&self.device, &surface_config);
-
         self.surface.configure(&self.device, &self.config)
     }
 
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
         self.size = new_size;
-
-        // reconfigure the surface
-        // self.configure_surface();
 
         if new_size.width > 0 && new_size.height > 0 {
             self.size = new_size;
@@ -199,70 +155,70 @@ impl State {
         }
     }
 
-    pub fn render(&mut self) {
-        // Create texture view.
-        // NOTE: We must handle Timeout because the surface may be unavailable
-        // (e.g., when the window is occluded on macOS).
-        let surface_texture = match self.surface.get_current_texture() {
-            wgpu::CurrentSurfaceTexture::Success(texture) => texture,
-            wgpu::CurrentSurfaceTexture::Occluded | wgpu::CurrentSurfaceTexture::Timeout => return,
-            wgpu::CurrentSurfaceTexture::Suboptimal(texture) => {
-                drop(texture);
-                self.configure_surface();
-                return;
-            }
-            wgpu::CurrentSurfaceTexture::Outdated => {
-                self.configure_surface();
-                return;
-            }
-            wgpu::CurrentSurfaceTexture::Validation => {
-                unreachable!("No error scope registered, so validation errors will panic")
-            }
-            wgpu::CurrentSurfaceTexture::Lost => {
-                self.surface = self.instance.create_surface(self.window.clone()).unwrap();
-                self.configure_surface();
-                return;
-            }
-        };
-        let texture_view = surface_texture
-            .texture
-            .create_view(&wgpu::TextureViewDescriptor {
-                // Without add_srgb_suffix() the image we will be working with
-                // might not be "gamma correct".
-                format: Some(self.surface_format.add_srgb_suffix()),
-                ..Default::default()
-            });
+    // pub fn render(&mut self) {
+    //     // Create texture view.
+    //     // NOTE: We must handle Timeout because the surface may be unavailable
+    //     // (e.g., when the window is occluded on macOS).
+    //     let surface_texture = match self.surface.get_current_texture() {
+    //         wgpu::CurrentSurfaceTexture::Success(texture) => texture,
+    //         wgpu::CurrentSurfaceTexture::Occluded | wgpu::CurrentSurfaceTexture::Timeout => return,
+    //         wgpu::CurrentSurfaceTexture::Suboptimal(texture) => {
+    //             drop(texture);
+    //             self.configure_surface();
+    //             return;
+    //         }
+    //         wgpu::CurrentSurfaceTexture::Outdated => {
+    //             self.configure_surface();
+    //             return;
+    //         }
+    //         wgpu::CurrentSurfaceTexture::Validation => {
+    //             unreachable!("No error scope registered, so validation errors will panic")
+    //         }
+    //         wgpu::CurrentSurfaceTexture::Lost => {
+    //             self.surface = self.instance.create_surface(self.window.clone()).unwrap();
+    //             self.configure_surface();
+    //             return;
+    //         }
+    //     };
+    //     let texture_view = surface_texture
+    //         .texture
+    //         .create_view(&wgpu::TextureViewDescriptor {
+    //             // Without add_srgb_suffix() the image we will be working with
+    //             // might not be "gamma correct".
+    //             format: Some(self.surface_format.add_srgb_suffix()),
+    //             ..Default::default()
+    //         });
 
-        // Renders a GREEN screen
-        let mut encoder = self.device.create_command_encoder(&Default::default());
-        // Create the renderpass which will clear the screen.
-        let renderpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: None,
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &texture_view,
-                depth_slice: None,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
-                    store: wgpu::StoreOp::Store,
-                },
-            })],
-            depth_stencil_attachment: None,
-            timestamp_writes: None,
-            occlusion_query_set: None,
-            multiview_mask: None,
-        });
+    //     // Renders a GREEN screen
+    //     let mut encoder = self.device.create_command_encoder(&Default::default());
+    //     // Create the renderpass which will clear the screen.
+    //     let renderpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+    //         label: None,
+    //         color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+    //             view: &texture_view,
+    //             depth_slice: None,
+    //             resolve_target: None,
+    //             ops: wgpu::Operations {
+    //                 load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
+    //                 store: wgpu::StoreOp::Store,
+    //             },
+    //         })],
+    //         depth_stencil_attachment: None,
+    //         timestamp_writes: None,
+    //         occlusion_query_set: None,
+    //         multiview_mask: None,
+    //     });
 
-        // If you wanted to call any drawing commands, they would go here.
+    //     // If you wanted to call any drawing commands, they would go here.
 
-        // End the renderpass.
-        drop(renderpass);
+    //     // End the renderpass.
+    //     drop(renderpass);
 
-        // Submit the command in the queue to execute
-        self.queue.submit([encoder.finish()]);
-        self.window.pre_present_notify();
-        self.queue.present(surface_texture);
-    }
+    //     // Submit the command in the queue to execute
+    //     self.queue.submit([encoder.finish()]);
+    //     self.window.pre_present_notify();
+    //     self.queue.present(surface_texture);
+    // }
 }
 
 

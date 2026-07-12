@@ -1,3 +1,5 @@
+//! Interface for the user to create applications
+
 use crate::wgpu_renderer::WgpuRendererInterface;
 
 
@@ -10,8 +12,6 @@ pub trait DefaultApplicationInterfaceCreate {
 }
 
 pub trait DefaultApplicationInterfaceRuntime {
-
-
     fn get_size(&self) -> winit::dpi::PhysicalSize<u32>;
     fn resize(
         &mut self,

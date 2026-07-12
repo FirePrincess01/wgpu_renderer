@@ -1,3 +1,7 @@
+//! Holds an instance to a user app which can be created at a later point in time
+//! 
+//! Details: This object is meant to be used dynamically so template cascading can be avoided
+
 use crate::{default_application::default_application_interface::{DefaultApplicationInterface, DefaultApplicationInterfaceCreate, DefaultApplicationInterfaceRuntime}, wgpu_renderer::WgpuRendererInterface};
 
 

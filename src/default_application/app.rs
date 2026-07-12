@@ -1,10 +1,8 @@
+//! Handles the event loop and calls the user application
+
 use std::sync::Arc;
 
-use winit::event::WindowEvent;
-
-use crate::default_application::{state::State, user_app_builder::UserAppBuilderInterface, user_event::UserEvent};
-
-
+use crate::default_application::{state::State, user_app_builder::UserAppBuilderInterface};
 
 pub struct App {
     /// Taken on the first `resumed` call so initialization happens once.
@@ -22,30 +20,6 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
         let Some(proxy) = self.proxy.take() else {
             return;
         };
-
-        // #[cfg_attr(
-        //     not(target_arch = "wasm32"),
-        //     expect(unused_mut, reason = "wasm32 re-assigns to specify canvas")
-        // )]
-        // let mut attributes = winit::window::Window::default_attributes().with_title("wgpu HDR test");
-
-        // #[cfg(target_arch = "wasm32")]
-        // {
-        //     use wasm_bindgen::JsCast;
-        //     use winit::platform::web::WindowAttributesExtWebSys;
-        //     let canvas = web_sys::window()
-        //         .unwrap()
-        //         .document()
-        //         .unwrap()
-        //         .get_element_by_id("canvas")
-        //         .expect("the page must have a <canvas id=\"canvas\">")
-        //         .dyn_into::<web_sys::HtmlCanvasElement>()
-        //         .unwrap();
-        //     attributes = attributes.with_canvas(Some(canvas));
-        // }
-
-        // let window = Arc::new(event_loop.create_window(attributes).unwrap());
-
 
         #[allow(unused_mut)]
         let mut window_attributes: winit::window::WindowAttributes = winit::window::Window::default_attributes();
@@ -99,14 +73,7 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
         match event {
             UserEvent::Initialized(state) => {
                 let mut state = *state;
-                // // The first display query runs here because it must be on the
-                // // main thread (see `requery_display_hdr_info`) and `State::new`
-                // // ran on a worker. It also seeds the baseline later re-queries
-                // // compare against.
-                // let info = state.surface.display_hdr_info(&state.adapter);
-                // report_display_hdr_info("initial query", &info);
-                // state.last_hdr_info = info;
-
+  
                 let scale_factor = state.window.scale_factor();
                 let size = state.window.inner_size();
                 self.user_app.create(&mut state, size, scale_factor as f32);
@@ -265,6 +232,14 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
     //     //     state.window.request_redraw();
     //     // }
     // }
+}
+
+
+/// Events delivered to the winit loop from outside a `WindowEvent`.
+pub enum UserEvent {
+    /// The async setup finished; carries the initialized `State`. Boxed to keep
+    /// the event small (`State` is large).
+    Initialized(Box<State>),
 }
 
 
