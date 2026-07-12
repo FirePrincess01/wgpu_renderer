@@ -23,9 +23,8 @@ impl State {
         window: Arc<Window>,
         instance: wgpu::Instance,
         surface: wgpu::Surface<'static>,
-        present_mode: Option<wgpu::PresentMode>,
     ) -> State {
-        let present_mode = present_mode.unwrap_or(wgpu::PresentMode::Fifo);
+        let present_mode = wgpu::PresentMode::AutoNoVsync;
 
         let size = PhysicalSize {
             width: 800,

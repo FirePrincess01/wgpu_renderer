@@ -90,7 +90,7 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
         // (native) or in the browser event loop (web); the finished `State`
         // arrives back on the main thread via `user_event`.
         spawn(async move {
-            let state = State::new(window, instance, surface, None).await;
+            let state = State::new(window, instance, surface).await;
             let _ = proxy.send_event(UserEvent::Initialized(Box::new(state)));
         });
     }
@@ -258,6 +258,13 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
             }
         }
     }
+
+    // fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
+    //     //  log::info!("about_to_wait");
+    //     // if let Some(state) = &self.state {
+    //     //     state.window.request_redraw();
+    //     // }
+    // }
 }
 
 
