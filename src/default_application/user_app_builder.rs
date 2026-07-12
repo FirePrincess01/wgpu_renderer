@@ -2,7 +2,7 @@
 //! 
 //! Details: This object is meant to be used dynamically so template cascading can be avoided
 
-use crate::{default_application::default_application_interface::{DefaultApplicationInterface, DefaultApplicationInterfaceCreate, DefaultApplicationInterfaceRuntime}, wgpu_renderer::WgpuRendererInterface};
+use crate::{default_application::default_application_interface::{DefaultApplicationInterface, DefaultApplicationInterfaceRuntime}, wgpu_renderer::WgpuRendererInterface};
 
 
 pub struct UserAppBuilder<UserApp: DefaultApplicationInterface> {
