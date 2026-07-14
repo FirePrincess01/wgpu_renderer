@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use winit::{dpi::PhysicalSize, window::Window};
 
-use crate::wgpu_renderer::{depth_texture, WgpuRendererInterface};
+use crate::wgpu_renderer::{WgpuRendererInterface, depth_texture, depth_texture_bind_group_layout::{self, DepthTextureBindGroupLayout}};
 
 pub struct State {
     pub instance: wgpu::Instance,
@@ -14,7 +14,8 @@ pub struct State {
     pub size: winit::dpi::PhysicalSize<u32>,
     pub surface: wgpu::Surface<'static>,
     pub surface_format: wgpu::TextureFormat,
-    pub depth_texture: depth_texture::DepthTexture,
+    // pub depth_texture_bind_group_layout: DepthTextureBindGroupLayout,
+    // pub depth_texture: depth_texture::DepthTexture,
     pub config: wgpu::SurfaceConfiguration,
 }
 
@@ -106,8 +107,13 @@ impl State {
         surface.configure(&device, &config);
         log::info!("Surface configured");
 
-        let depth_texture =
-            depth_texture::DepthTexture::create_depth_texture(&device, &config, "depth_texture");
+        // let depth_texture_bind_group_layout = DepthTextureBindGroupLayout::new(&device);
+        // let depth_texture =
+        //     depth_texture::DepthTexture::create_depth_texture(
+        //         &device, 
+        //         &depth_texture_bind_group_layout,
+        //         &config, "depth_texture"
+        //     );
         log::info!("Depth texture created");
 
         let state = State {
@@ -118,7 +124,8 @@ impl State {
             size,
             surface,
             surface_format,
-            depth_texture,
+            // depth_texture_bind_group_layout,
+            // depth_texture,
             config,
         };
 
@@ -143,11 +150,12 @@ impl State {
             self.size = new_size;
             self.config.width = new_size.width;
             self.config.height = new_size.height;
-            self.depth_texture = depth_texture::DepthTexture::create_depth_texture(
-                &self.device,
-                &self.config,
-                "depth_texture",
-            );
+            // self.depth_texture = depth_texture::DepthTexture::create_depth_texture(
+            //     &self.device,
+            //     &self.depth_texture_bind_group_layout,
+            //     &self.config,
+            //     "depth_texture",
+            // );
             self.surface.configure(&self.device, &self.config)
         }
     }
@@ -174,9 +182,13 @@ impl WgpuRendererInterface for State {
         self.config.format
     }
 
-    fn get_depth_texture_view(&self) -> &wgpu::TextureView {
-        &self.depth_texture.view
-    }
+    // fn get_dpeth_texture_bind_group_layout(&self) -> &DepthTextureBindGroupLayout {
+    //     &self.depth_texture_bind_group_layout
+    // }
+
+    // fn get_depth_texture_view(&self) -> &wgpu::TextureView {
+    //     &self.depth_texture.view
+    // }
 
     fn get_current_texture(&self) -> wgpu::CurrentSurfaceTexture {
         self.surface.get_current_texture()
@@ -200,5 +212,13 @@ impl WgpuRendererInterface for State {
 
     fn pre_present_notify(&mut self) {
         self.window.pre_present_notify();
+    }
+    
+    // fn get_depth_texture(&self) -> &depth_texture::DepthTexture {
+    //     &self.depth_texture
+    // }
+    
+    fn config(&self) -> &wgpu::SurfaceConfiguration {
+        &self.config
     }
 }
