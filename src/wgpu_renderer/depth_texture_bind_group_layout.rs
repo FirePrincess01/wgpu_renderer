@@ -1,4 +1,4 @@
-//! A bind group to create a heightmap for this shader
+//! A bind group to use the depth texture
 //!
 
 pub struct DepthTextureBindGroupLayout {
@@ -26,7 +26,7 @@ impl DepthTextureBindGroupLayout {
                         // This should match the filterable field of the
                         // corresponding Texture entry above.
                         ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Comparison),
-                        // ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        // ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering), // does not work with wgsl
                         count: None,
                     },
                 ],

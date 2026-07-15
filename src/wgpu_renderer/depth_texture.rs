@@ -1,13 +1,13 @@
 //! Container an description of a texture for wgpu
 //!
 
-use crate::wgpu_renderer::{WgpuRendererInterface, depth_texture_bind_group_layout::{self, DepthTextureBindGroupLayout}};
+use crate::wgpu_renderer::{WgpuRendererInterface, depth_texture_bind_group_layout::DepthTextureBindGroupLayout};
 
 pub struct DepthTexture {
     pub texture: wgpu::Texture,
     pub view: wgpu::TextureView,
     pub sampler: wgpu::Sampler,
-    pub sampler_filter: wgpu::Sampler,
+    // pub sampler_filter: wgpu::Sampler,
     pub bind_group: wgpu::BindGroup,
 }
 
@@ -53,18 +53,18 @@ impl DepthTexture {
             ..Default::default()
         });
 
-        let sampler_filter = wgpu_renderer.device().create_sampler(&wgpu::SamplerDescriptor {
-            address_mode_u: wgpu::AddressMode::ClampToEdge,
-            address_mode_v: wgpu::AddressMode::ClampToEdge,
-            address_mode_w: wgpu::AddressMode::ClampToEdge,
-            mag_filter: wgpu::FilterMode::Linear,
-            min_filter: wgpu::FilterMode::Linear,
-            mipmap_filter: wgpu::MipmapFilterMode::Nearest,
-            compare: None,
-            lod_min_clamp: 0.0,
-            lod_max_clamp: 100.0,
-            ..Default::default()
-        });
+        // let sampler_filter = wgpu_renderer.device().create_sampler(&wgpu::SamplerDescriptor {
+        //     address_mode_u: wgpu::AddressMode::ClampToEdge,
+        //     address_mode_v: wgpu::AddressMode::ClampToEdge,
+        //     address_mode_w: wgpu::AddressMode::ClampToEdge,
+        //     mag_filter: wgpu::FilterMode::Linear,
+        //     min_filter: wgpu::FilterMode::Linear,
+        //     mipmap_filter: wgpu::MipmapFilterMode::Nearest,
+        //     compare: None,
+        //     lod_min_clamp: 0.0,
+        //     lod_max_clamp: 100.0,
+        //     ..Default::default()
+        // });
 
         let bind_group = wgpu_renderer.device()
             .create_bind_group(&wgpu::BindGroupDescriptor {
@@ -86,7 +86,7 @@ impl DepthTexture {
             texture,
             view,
             sampler,
-            sampler_filter,
+            // sampler_filter,
             bind_group,
         }
     }
