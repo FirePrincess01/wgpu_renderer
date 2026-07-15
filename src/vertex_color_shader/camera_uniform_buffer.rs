@@ -33,14 +33,15 @@ impl CameraUniformBuffer {
 
         let camera_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: camera_bind_group_layout.get(),
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: camera_buffer.as_entire_binding(),
-            },
-            wgpu::BindGroupEntry {
-                binding: 1,
-                resource: camera_light_buffer.as_entire_binding(),
-            }
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: camera_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: camera_light_buffer.as_entire_binding(),
+                },
             ],
             label: Some("camera_bind_group"),
         });
@@ -52,7 +53,11 @@ impl CameraUniformBuffer {
         }
     }
 
-    pub fn update_camera(&mut self, queue: &wgpu::Queue, camera_uniform: camera_uniform::CameraUniform) {
+    pub fn update_camera(
+        &mut self,
+        queue: &wgpu::Queue,
+        camera_uniform: camera_uniform::CameraUniform,
+    ) {
         queue.write_buffer(
             &self.camera_buffer,
             0,
@@ -60,7 +65,11 @@ impl CameraUniformBuffer {
         );
     }
 
-    pub fn update_light(&mut self, queue: &wgpu::Queue, camera_light_uniform: camera_uniform::CameraUniform) {
+    pub fn update_light(
+        &mut self,
+        queue: &wgpu::Queue,
+        camera_light_uniform: camera_uniform::CameraUniform,
+    ) {
         queue.write_buffer(
             &self.camera_light_buffer,
             0,

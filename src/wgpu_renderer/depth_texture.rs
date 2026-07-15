@@ -1,7 +1,9 @@
 //! Container an description of a texture for wgpu
 //!
 
-use crate::wgpu_renderer::{WgpuRendererInterface, depth_texture_bind_group_layout::DepthTextureBindGroupLayout};
+use crate::wgpu_renderer::{
+    depth_texture_bind_group_layout::DepthTextureBindGroupLayout, WgpuRendererInterface,
+};
 
 pub struct DepthTexture {
     pub texture: wgpu::Texture,
@@ -20,7 +22,7 @@ impl DepthTexture {
         label: &str,
     ) -> Self {
         let config = wgpu_renderer.config();
-    
+
         let size = wgpu::Extent3d {
             width: config.width,
             height: config.height,
@@ -40,18 +42,20 @@ impl DepthTexture {
         let texture = wgpu_renderer.device().create_texture(&desc);
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-        let sampler = wgpu_renderer.device().create_sampler(&wgpu::SamplerDescriptor {
-            address_mode_u: wgpu::AddressMode::ClampToEdge,
-            address_mode_v: wgpu::AddressMode::ClampToEdge,
-            address_mode_w: wgpu::AddressMode::ClampToEdge,
-            mag_filter: wgpu::FilterMode::Nearest,
-            min_filter: wgpu::FilterMode::Nearest,
-            mipmap_filter: wgpu::MipmapFilterMode::Nearest,
-            compare: Some(wgpu::CompareFunction::LessEqual),
-            lod_min_clamp: 0.0,
-            lod_max_clamp: 100.0,
-            ..Default::default()
-        });
+        let sampler = wgpu_renderer
+            .device()
+            .create_sampler(&wgpu::SamplerDescriptor {
+                address_mode_u: wgpu::AddressMode::ClampToEdge,
+                address_mode_v: wgpu::AddressMode::ClampToEdge,
+                address_mode_w: wgpu::AddressMode::ClampToEdge,
+                mag_filter: wgpu::FilterMode::Nearest,
+                min_filter: wgpu::FilterMode::Nearest,
+                mipmap_filter: wgpu::MipmapFilterMode::Nearest,
+                compare: Some(wgpu::CompareFunction::LessEqual),
+                lod_min_clamp: 0.0,
+                lod_max_clamp: 100.0,
+                ..Default::default()
+            });
 
         // let sampler_filter = wgpu_renderer.device().create_sampler(&wgpu::SamplerDescriptor {
         //     address_mode_u: wgpu::AddressMode::ClampToEdge,
@@ -66,7 +70,8 @@ impl DepthTexture {
         //     ..Default::default()
         // });
 
-        let bind_group = wgpu_renderer.device()
+        let bind_group = wgpu_renderer
+            .device()
             .create_bind_group(&wgpu::BindGroupDescriptor {
                 layout: depth_texture_bind_group_layout.get(),
                 entries: &[

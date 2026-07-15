@@ -163,7 +163,6 @@ impl WgpuRendererInterface for State {
         self.config.format
     }
 
-
     fn get_current_texture(&self) -> wgpu::CurrentSurfaceTexture {
         self.surface.get_current_texture()
     }
@@ -187,7 +186,7 @@ impl WgpuRendererInterface for State {
     fn pre_present_notify(&mut self) {
         self.window.pre_present_notify();
     }
-    
+
     fn config(&self) -> &wgpu::SurfaceConfiguration {
         &self.config
     }
