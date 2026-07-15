@@ -36,4 +36,11 @@ impl Camera {
         let (sin_yaw, cos_yaw) = self.yaw.0.sin_cos();
         Vector3::new(cos_pitch * cos_yaw, sin_pitch, cos_pitch * sin_yaw).normalize()
     }
+
+    pub fn set_view_direction(&mut self, dir: Vector3<f32>) {
+        let dir = dir.normalize();
+
+        self.pitch.0 = dir.y.asin();
+        self.yaw.0 = dir.z.atan2(dir.x);
+    }
 }

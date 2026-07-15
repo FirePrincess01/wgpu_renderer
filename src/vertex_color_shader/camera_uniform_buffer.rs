@@ -7,6 +7,7 @@ use wgpu::util::DeviceExt;
 
 pub struct CameraUniformBuffer {
     camera_buffer: wgpu::Buffer,
+    camera_light_buffer: wgpu::Buffer,
     camera_bind_group: wgpu::BindGroup,
 }
 
@@ -16,6 +17,7 @@ impl CameraUniformBuffer {
         camera_bind_group_layout: &camera_bind_group_layout::CameraBindGroupLayout,
     ) -> Self {
         let camera_uniform = camera_uniform::CameraUniform::new();
+        let camera_light_uniform = camera_uniform::CameraUniform::new();
 
         let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera Buffer"),
@@ -23,26 +25,55 @@ impl CameraUniformBuffer {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
+        let camera_light_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Camera Light Buffer"),
+            contents: bytemuck::cast_slice(&[camera_light_uniform]),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
         let camera_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: camera_bind_group_layout.get(),
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: camera_buffer.as_entire_binding(),
-            }],
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: camera_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: camera_light_buffer.as_entire_binding(),
+                },
+            ],
             label: Some("camera_bind_group"),
         });
 
         Self {
             camera_buffer,
+            camera_light_buffer,
             camera_bind_group,
         }
     }
 
-    pub fn update(&mut self, queue: &wgpu::Queue, camera_uniform: camera_uniform::CameraUniform) {
+    pub fn update_camera(
+        &mut self,
+        queue: &wgpu::Queue,
+        camera_uniform: camera_uniform::CameraUniform,
+    ) {
         queue.write_buffer(
             &self.camera_buffer,
             0,
             bytemuck::cast_slice(&[camera_uniform]),
+        );
+    }
+
+    pub fn update_light(
+        &mut self,
+        queue: &wgpu::Queue,
+        camera_light_uniform: camera_uniform::CameraUniform,
+    ) {
+        queue.write_buffer(
+            &self.camera_light_buffer,
+            0,
+            bytemuck::cast_slice(&[camera_light_uniform]),
         );
     }
 
