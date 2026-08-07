@@ -91,34 +91,38 @@ impl Mesh {
         self.instance_buffer.update(queue, instance_data);
     }
 
-    fn do_draw_range<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, nr_instances: usize) {
+    fn do_draw_range<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, nr_vertices: usize) {
+        assert!(nr_vertices <= self.index_buffer.size() as usize);
+
         self.vertex_buffer.bind(render_pass);
         self.color_buffer.bind(render_pass);
         self.index_buffer.bind(render_pass);
         self.instance_buffer.bind_slot(render_pass, 2);
 
+        let nr_vertices = nr_vertices as u32;
+
         render_pass.draw_indexed(
-            0..self.index_buffer.size(),
+            0..nr_vertices,
             0,
-            0..nr_instances as u32,
+            0..self.instance_buffer.size(),
         );
     }
 }
 
 impl VertexColorShaderDraw for Mesh {
     fn draw<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
-        self.do_draw_range(render_pass, self.instance_buffer.size() as usize);
+        self.do_draw_range(render_pass, self.index_buffer.size() as usize);
     }
 }
 
 impl VertexColorShaderDrawLines for Mesh {
     fn draw_lines<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
-        self.do_draw_range(render_pass, self.instance_buffer.size() as usize);
+        self.do_draw_range(render_pass, self.index_buffer.size() as usize);
     }
 }
 
 impl VertexColorShaderDrawLinesRange for Mesh {
-    fn draw_lines_range<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, nr_instances: usize) {
-        self.do_draw_range(render_pass, nr_instances);
+    fn draw_lines_range<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, nr_vertices: usize) {
+        self.do_draw_range(render_pass, nr_vertices);
     }
 }

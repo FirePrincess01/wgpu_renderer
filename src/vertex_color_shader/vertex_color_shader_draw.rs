@@ -7,5 +7,5 @@ pub trait VertexColorShaderDrawLines {
 }
 
 pub trait VertexColorShaderDrawLinesRange {
-    fn draw_lines_range<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, nr_instances: usize);
+    fn draw_lines_range<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, nr_vertices: usize);
 }
