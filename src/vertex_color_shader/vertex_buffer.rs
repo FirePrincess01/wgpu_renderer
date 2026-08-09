@@ -31,7 +31,7 @@ where
     pub fn update(&mut self, queue: &wgpu::Queue, vertices: &[TVertex]) {
         let data = bytemuck::cast_slice(vertices);
 
-        if data.len() as u64 <= self.buffer.size(){
+        if data.len() as u64 <= self.buffer.size() {
             queue.write_buffer(&self.buffer, 0, data);
         }
     }
