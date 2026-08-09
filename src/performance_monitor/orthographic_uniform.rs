@@ -29,6 +29,7 @@ impl CameraUniform {
         Self {
             view_position: [0.0; 4],
             view_proj: mat.into(),
+            proj: mat.into(),
         }
     }
 

@@ -12,6 +12,7 @@ pub struct CameraUniform {
     // We can't use cgmath with bytemuck directly so we'll have
     // to convert the Matrix4 into a 4x4 f32 array
     pub view_proj: [[f32; 4]; 4],
+    pub proj: [[f32; 4]; 4],
 }
 
 impl Default for CameraUniform {
@@ -26,6 +27,7 @@ impl CameraUniform {
         Self {
             view_position: [0.0; 4],
             view_proj: cgmath::Matrix4::identity().into(),
+            proj: cgmath::Matrix4::identity().into(),
         }
     }
 
@@ -38,7 +40,10 @@ impl CameraUniform {
         camera: &wgpu_renderer::camera::Camera,
         projection: &wgpu_renderer::camera::Projection,
     ) {
+        let projection_mat = projection.calc_matrix();
+
         self.view_position = camera.position.to_homogeneous().into();
-        self.view_proj = (projection.calc_matrix() * camera.calc_matrix()).into();
+        self.view_proj = (projection_mat * camera.calc_matrix()).into();
+        self.proj = projection_mat.into();
     }
 }
