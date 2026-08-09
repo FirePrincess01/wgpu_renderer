@@ -1,10 +1,7 @@
 //! Contains the device buffers to render an object with this shader
 //!
 
-use wgpu::wgc::device::UserClosures;
-
 use crate::shape;
-use crate::vertex_color_shader::vertex_color_shader_draw::VertexColorShaderDrawLinesRange;
 
 use super::vertex_color_shader_draw::VertexColorShaderDrawLines;
 use super::Color;
@@ -91,18 +88,14 @@ impl Mesh {
         self.instance_buffer.update(queue, instance_data);
     }
 
-    fn do_draw_range<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, nr_vertices: usize) {
-        assert!(nr_vertices <= self.index_buffer.size() as usize);
-
+    fn do_draw<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
         self.vertex_buffer.bind(render_pass);
         self.color_buffer.bind(render_pass);
         self.index_buffer.bind(render_pass);
         self.instance_buffer.bind_slot(render_pass, 2);
 
-        let nr_vertices = nr_vertices as u32;
-
         render_pass.draw_indexed(
-            0..nr_vertices,
+            0..self.index_buffer.size(),
             0,
             0..self.instance_buffer.size(),
         );
@@ -111,18 +104,12 @@ impl Mesh {
 
 impl VertexColorShaderDraw for Mesh {
     fn draw<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
-        self.do_draw_range(render_pass, self.index_buffer.size() as usize);
+        self.do_draw(render_pass);
     }
 }
 
 impl VertexColorShaderDrawLines for Mesh {
     fn draw_lines<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>) {
-        self.do_draw_range(render_pass, self.index_buffer.size() as usize);
-    }
-}
-
-impl VertexColorShaderDrawLinesRange for Mesh {
-    fn draw_lines_range<'a>(&'a self, render_pass: &mut wgpu::RenderPass<'a>, nr_vertices: usize) {
-        self.do_draw_range(render_pass, nr_vertices);
+        self.do_draw(render_pass);
     }
 }
