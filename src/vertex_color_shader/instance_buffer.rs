@@ -5,7 +5,7 @@ use wgpu::util::DeviceExt;
 
 pub struct InstanceBuffer<TInstance> {
     buffer: wgpu::Buffer,
-    _size: u32,
+    _size: usize,
     phantom: std::marker::PhantomData<TInstance>,
 }
 
@@ -20,7 +20,7 @@ where
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
-        let _size = instances.len() as u32;
+        let _size = instances.len();
 
         Self {
             buffer,
@@ -45,7 +45,11 @@ where
         render_pass.set_vertex_buffer(slot, self.buffer.slice(..));
     }
 
-    pub fn size(&self) -> u32 {
+    pub fn len(&self) -> usize {
         self._size
+    }
+
+    pub fn size(&self) -> u32 {
+        self._size as u32
     }
 }
