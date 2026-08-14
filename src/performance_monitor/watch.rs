@@ -87,9 +87,23 @@ impl WatchPoint {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct WatchViewerData<const SIZE: usize> {
     pub last_update_time: instant::Instant,
     pub update_time: instant::Instant,
     pub watch_points: [WatchPoint; SIZE],
+}
+
+impl<const SIZE: usize> WatchViewerData<SIZE> {
+    pub fn new() -> Self {
+        let last_update_time = instant::Instant::now();
+        let update_time = last_update_time;
+        let watch_points = [WatchPoint::new(update_time); SIZE];
+
+        Self {
+            last_update_time,
+            update_time,
+            watch_points,
+        }
+    }
 }
