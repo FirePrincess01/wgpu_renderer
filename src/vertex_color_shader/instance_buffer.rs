@@ -49,6 +49,11 @@ where
         self._size
     }
 
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub fn size(&self) -> u32 {
         self._size as u32
     }

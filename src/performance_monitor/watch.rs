@@ -94,6 +94,12 @@ pub struct WatchViewerData<const SIZE: usize> {
     pub watch_points: [WatchPoint; SIZE],
 }
 
+impl<const SIZE: usize> Default for WatchViewerData<SIZE> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<const SIZE: usize> WatchViewerData<SIZE> {
     pub fn new() -> Self {
         let last_update_time = instant::Instant::now();
