@@ -7,7 +7,7 @@ pub struct Watch<const SIZE: usize> {
     watch_points: [WatchPoint; SIZE],
 
     index_start: usize,
-    index_end: usize, 
+    index_end: usize,
 }
 
 impl<const SIZE: usize> Default for Watch<SIZE> {
@@ -52,11 +52,11 @@ impl<const SIZE: usize> Watch<SIZE> {
 
     pub fn stop(&mut self) {
         assert!(self.index_start <= SIZE);
-        
-        if self.index_start != self.index_end+1 {
+
+        if self.index_start != self.index_end + 1 {
             return;
         }
-        
+
         let now = instant::Instant::now();
         self.watch_points[self.index_end].stop = now;
 
